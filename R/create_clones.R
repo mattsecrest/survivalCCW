@@ -38,6 +38,7 @@ create_clones <- function(
    ced_window = NULL
 ) {
 
+   # Check inputs
    valid_inputs <- create_clones_check_inputs(df = df, 
                                               id = id,
                                               event = event,
@@ -48,7 +49,7 @@ create_clones <- function(
 
    if (!valid_inputs) stop("something went wrong")
 
-   # 
+   # Now create one-row-per-clone data.frame
 
    return(df)
    

@@ -66,6 +66,13 @@ create_clones_check_inputs <- function(
    checkmate::assert_true(class(df[,exposure]) %in% c("integer", "logical"))
    checkmate::assert_true(class(df[,id]) %in% c("integer", "numeric", "character"))
 
+   # Some protected names
+   protected_names <- c("clone", "outcome", "fup_outcome", "censor", "fup_censor")
+   for (name in protected_names) {
+      if (name %in% names(df)) {
+         stop("'", name, "' is a protected collumn name and will be used by the function. Please rename this column")
+      }
+   }
 
    inputs_good <- TRUE 
    

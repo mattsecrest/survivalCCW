@@ -203,3 +203,31 @@ test_that("for all pts with an exposure, time to exposure is complete", {
   )
 
 })
+
+test_that("protected column names are blocked", {
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    clone = c(0L, 1L, 0L, 1L),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(T, T, F, T),
+    time_to_exposure = c(1.1, 3.3, NA_real_, 3.3)
+  )
+
+  expect_error(
+    create_clones_check_inputs(df, id = "id", event = "clone", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+  )
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(0L, 1L, 0L, 1L),
+    time_to_event = c(1, 2, 1, 2),
+    censor = c(T, T, F, T),
+    time_to_exposure = c(1.1, 3.3, NA_real_, 3.3)
+  )
+
+  expect_error(
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "censor", time_to_exposure = "time_to_exposure")
+  )
+
+}
