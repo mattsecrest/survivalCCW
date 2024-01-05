@@ -67,7 +67,7 @@ create_clones <- function(
    df_0$clone <- 0L
    df_1$clone <- 1L
 
-   # Outcomes
+   # EXPOSED
    ## Truly exposed --> keep outcomes
    df_1[df_1[, exposure] == 1L, "outcome"] <- df_1[df_1[, exposure] == 1L, event]
    df_1[df_1[, exposure] == 1L, "fup_outcome"] <- df_1[df_1[, exposure] == 1L, time_to_event]
@@ -79,6 +79,10 @@ create_clones <- function(
    ## Not exposed, follow-up ends after CED --> censor
    df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "outcome"] <- 0L
    df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "fup_outcome"] <- ced_window
+
+   # UNEXPOSED
+   ## Truly unexposed --> keep outcomes
+   
 
    # Combine and return 
    df_clones <- rbind(df_1, df_0)
