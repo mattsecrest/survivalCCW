@@ -4,7 +4,7 @@
 #' 
 #' @references Maringe, Camille, et al. "Reflection on modern methods: trial emulation in the presence of immortal-time bias. Assessing the benefit of major surgery for elderly lung cancer patients using observational data." International journal of epidemiology 49.5 (2020): 1719-1729.
 #'
-#' @format ## `maringe_tab`
+#' @format ## `toy_df`
 #' A data frame with 200 rows and 12 columns:
 #' \describe{
 #'   \item{id}{patient identifier}
@@ -20,4 +20,4 @@
 #'   \item{emergency}{route to diagnosis}
 #' }
 #' @source <https://doi.org/10.1093/ije/dyaa057>
-"maringe_tab"
+"toy_df"

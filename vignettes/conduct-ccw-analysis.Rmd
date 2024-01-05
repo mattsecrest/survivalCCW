@@ -1,0 +1,61 @@
+---
+title: "How to Conduct a Clone Censor-Weight Survival Analysis using survivalCCW"
+author: Matthew Secrest
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How to Conduct a Clone Censor-Weight Survival Analysis using survivalCCW}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Clone Censor Weighting
+
+This lightweight package describes how to conduct clone-censor weighting (CCW) to address the problem of immortal time bias in survival analysis. This vignette will walk through the applied tutorial published by [Maringe et al 2020](https://academic.oup.com/ije/article/49/5/1719/5835351). Refer to [Hernan and Robins 2016](https://doi.org/10.1093/aje/kwv254) and [Hernan et al 2016](https://doi.org/10.1016/j.jclinepi.2016.04.014) for more technical details.
+
+# Context
+
+CCW is useful in the presence of immortal person-time bias in observational studies. For instance, when comparing surgery recipients vs non-recipients in non-small cell lung cancer (NSCLC), the surgery group will have a longer survival time than the non-surgery group because the non-surgery group includes patients who died before they could receive surgery. This is a form of immortal time bias.
+
+The CCW toy dataset published by Maringe uses this exact setting as the motivating example. Let's explore the dataset, which comes with `survivalCCW`.
+
+```{r}
+library(survivalCCW)
+head(toy_df)
+```
+
+Column descriptions can be found with `?toy_df`:
+
+- `id`: patient identifier
+- `fup_obs`: observed follow-up time (time to death or 1 year if censored alive)
+- `death`: observed event of interest (all-cause death) 1: dead, 0: alive
+- `timetosurgery`: time to surgery (NA if no surgery)
+- `age`: age at diagnosis
+- `sex`: patient's sex
+- `perf`: performance status at diagnosis
+- `stage`: stage at diagnosis
+- `deprivation`: deprivation score
+- `charlson`: Charlson's comorbidity index
+- `emergency`: route to diagnosis
+
+Note that this package addresses situations in which the covariates are all defined at baseline.
+
+# Create clones
+
+The first step is to create the clones. This can be done for any time-to-event outcome (in the absence of competing risks) using the `survivalCCW` function `create_clones`. For `create_clones` to work, we need to pass a one-row-per-patient `data.frame` with the following columns:
+
+- The traditional outcome variable which denotes censorship (0) or event (1) (in this case, `death`)
+- The time to event variable (in this case, `fup_obs`)
+- The exposure variable, with exposure defined **at any time prior to censorship/event** (in this case, `surgery`)
+- The time to exposure variable (in this case, `timetosurgery`)
+- The id variable (in this case, `id`)
+
+All other columns will be propogated for each patient.
+
