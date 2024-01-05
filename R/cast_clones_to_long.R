@@ -28,14 +28,17 @@ cast_clones_to_long <- function(df) {
    if (!all(c("outcome", "fup_outcome", "censor", "fup_censor", "clone") %in% names(df))) {
       stop("The input data.frame is missing one of the required columns: outcome, fup_outcome, censor, fup_censor, clone. Did you remove this?")
    }
-   if (!all(c("id", "event", "time_to_event", "exposure", "time_to_exposure", "ced_window") %in% names(df))) {
+   if (!all(c("id", "event", "time_to_event", "exposure", "time_to_exposure", "ced_window") %in% names(attributes(df)))) {
       stop("The input data.frame is missing attributes: id, event, time_to_event, exposure, time_to_exposure, ced_window. Did you remove these or try to make a custom data.frame?")
    }
 
-   # 
+   # Now convert to long
 
 
 
+   df_long <- df
 
+   class(df_long) <- c("ccw_clones_long", class(df_long))
 
+   return(df_long)
 }
