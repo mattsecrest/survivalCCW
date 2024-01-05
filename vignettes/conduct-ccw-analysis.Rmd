@@ -92,8 +92,16 @@ No additional arguments are needed (the `clones` object is an artifact that allo
 clones_long <- cast_clones_to_long(clones)
 
 head(clones_long)
-
 ```
 
+Let's pick out a single patient and look at their data:
 
-# Bootstrap
+```{r}
+clones_long[clones_long$id == "P5913", ]
+```
+
+# Generate weights
+
+
+
+# Bootstrap outcomes 

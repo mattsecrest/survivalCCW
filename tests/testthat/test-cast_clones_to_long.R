@@ -25,6 +25,14 @@ test_that("casting clones requires ccw_clones class", {
   expect_error(
     cast_clones_to_long(ccw_df)
   )
+})
 
+test_that("long format was created correctly", {
 
+  df_long <- toy_df |>
+    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2) |>
+    cast_clones_to_long()
+
+  expect_true(TRUE)
+  #@TODO more test cases
 })

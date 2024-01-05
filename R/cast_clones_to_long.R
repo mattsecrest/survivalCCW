@@ -2,7 +2,7 @@
 #' 
 #' @param df A data.frame with one row per clone as returned by [create_clones()]
 #' 
-#' @return A data.frame with one row per patient per time period.
+#' @return A data.frame with one row per patient per time period per clone.
 #' 
 #' @export
 #' 
@@ -21,6 +21,8 @@
 #'                         ced_window = 365.25/2)
 #' 
 #' clones_long <- cast_clones_to_long(clones)
+#' 
+#' @references Maringe, Camille, et al. "Reflection on modern methods: trial emulation in the presence of immortal-time bias. Assessing the benefit of major surgery for elderly lung cancer patients using observational data." International journal of epidemiology 49.5 (2020): 1719-1729.
 cast_clones_to_long <- function(df) {
 
    # Check inputs
@@ -32,13 +34,131 @@ cast_clones_to_long <- function(df) {
       stop("The input data.frame is missing attributes: id, event, time_to_event, exposure, time_to_exposure, ced_window. Did you remove these or try to make a custom data.frame?")
    }
 
+   id <- attributes(df)$id
+   event <- attributes(df)$event
+   exposure <- attributes(df)$exposure
+   time_to_event <- attributes(df)$time_to_event
+   time_to_exposure <- attributes(df)$time_to_exposure
+   ced_window <- attributes(df)$ced_window
+
    # Now convert to long
+   event_times <- sort(unique(c(df[,time_to_event], df[,time_to_exposure], ced_window)))
+   event_times_df <- data.frame(
+      t_event = event_times,
+      time_id = 1:NROW(event_times)
+   )
 
+   # Exposed
+   ## Outcome
+   df_1 <- df[df[, "clone"] == 1L, ]
+   
+   df_1$t_start <- 0.
 
+   df_1_long_outcome <- survival::survSplit(
+      df_1, 
+      cut = event_times, 
+      end = "fup_outcome",
+      start = "t_start",
+      event = "outcome"
+   )
 
-   df_long <- df
+   df_1_long_outcome <- df_1_long_outcome[order(df_1_long_outcome[, id], df_1_long_outcome[, "fup_outcome"]), ]
 
+   ## Censor
+   df_1_long_censor <- survival::survSplit(
+      df_1, 
+      cut = event_times, 
+      end = "fup_outcome", # Not a typo, we want to expand at the outcome time still
+      start = "t_start",
+      event = "censor"
+   )
+
+   df_1_long_censor <- df_1_long_censor[order(df_1_long_censor[, id], df_1_long_censor[, "fup_outcome"]), ]
+   
+   ## Replace censoring variable in df_1_long_outcome
+   df_1_long_outcome$censor <- df_1_long_censor$censor
+
+   df_1_long_outcome$t_stop <- df_1_long_outcome$fup_outcome
+
+   df_1_long <- merge(
+      x = df_1_long_outcome,
+      y = event_times_df, 
+      by.x = "t_start",
+      by.y = "t_event",
+      all.x = TRUE)
+
+   df_1_long <- df_1_long[order(df_1_long[,id], df_1_long[, "fup_outcome"]), ]
+   df_1_long$time_id[is.na(df_1_long$time_id)] <- 0
+   rownames(df_1_long) <- NULL
+
+   # Unexposed
+   ## Outcome
+   df_0 <- df[df[, "clone"] == 0L, ]
+   
+   df_0$t_start <- 0.
+
+   df_0_long_outcome <- survival::survSplit(
+      df_0, 
+      cut = event_times, 
+      end = "fup_outcome",
+      start = "t_start",
+      event = "outcome"
+   )
+
+   df_0_long_outcome <- df_0_long_outcome[order(df_0_long_outcome[, id], df_0_long_outcome[, "fup_outcome"]), ]
+
+   ## Censor
+   df_0_long_censor <- survival::survSplit(
+      df_0, 
+      cut = event_times, 
+      end = "fup_outcome", # Not a typo, we want to expand at the outcome time still
+      start = "t_start",
+      event = "censor"
+   )
+
+   df_0_long_censor <- df_0_long_censor[order(df_0_long_censor[, id], df_0_long_censor[, "fup_outcome"]), ]
+   
+   ## Replace censoring variable in df_1_long_outcome
+   df_0_long_outcome$censor <- df_0_long_censor$censor
+
+   df_0_long_outcome$t_stop <- df_0_long_outcome$fup_outcome
+
+   df_0_long <- merge(
+      x = df_0_long_outcome,
+      y = event_times_df, 
+      by.x = "t_start",
+      by.y = "t_event",
+      all.x = TRUE)
+
+   df_0_long <- df_0_long[order(df_0_long[,id], df_0_long[, "fup_outcome"]), ]
+   df_0_long$time_id[is.na(df_0_long$time_id)] <- 0
+   rownames(df_0_long) <- NULL 
+
+   # Combine
+   df_long <- rbind(
+      df_1_long,
+      df_0_long
+   )
+
+   df_long <- merge( 
+      x = df_long,
+      y = event_times_df,
+      by = "time_id",
+      all.x = TRUE
+   )
+   
+   df_long <- df_long[order(df_long[,id], df_long[, "clone"], df_long[, "fup_outcome"]), ]
+
+   rownames(df_long) <- NULL
+
+   # Add attributes and return
    class(df_long) <- c("ccw_clones_long", class(df_long))
+   attributes(df_long)$id <- id
+   attributes(df_long)$event <- event
+   attributes(df_long)$time_to_event <- time_to_event
+   attributes(df_long)$exposure <- exposure
+   attributes(df_long)$time_to_exposure <- time_to_exposure
+   attributes(df_long)$ced_window <- ced_window
 
    return(df_long)
 }
