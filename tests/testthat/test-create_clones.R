@@ -2,11 +2,12 @@ test_that("input types correct", {
 
   df <- data.frame(
     id = c(1, 2, 3, 4),
-    event = c(0, 1, 0, 1),
+    event = c(0L, 1L, 0L, 1L),
     time_to_event = c(1, 2, 1, 2),
-    exposure = c(0, 1, 0, 1),
+    exposure = c(0L, 1L, 0L, 1L),
     time_to_exposure = c(1, 2, 1, 2)
   )
+
   expect_error(
     create_clones(df, id = id, event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
@@ -29,9 +30,9 @@ test_that("columns are in data", {
 
   df <- data.frame(
     id = c(1, 2, 3, 4),
-    event = c(0, 1, 0, 1),
+    event = c(0L, 1L, 0L, 1L),
     time_to_event = c(1, 2, 1, 2),
-    exposure = c(0, 1, 0, 1),
+    exposure = c(0L, 1L, 0L, 1L),
     time_to_exposure = c(1, 2, 1, 2)
   )
 
@@ -53,9 +54,9 @@ test_that("no missing data exists in these columns", {
 
   df <- data.frame(
     id = c(1, 2, 3, 4),
-    event = c(0, 1, NA_integer_, 1),
+    event = c(0L, 1L, NA_integer_, 1L),
     time_to_event = c(1, 2, 1, 2),
-    exposure = c(0, 1, 0, 1),
+    exposure = c(0L, 1L, 0L, 1L),
     time_to_exposure = c(1, 2, 1, 2)
   )
 
@@ -69,15 +70,28 @@ test_that("the data are one-row-per-patient", {
   
     df <- data.frame(
       id = c(1, 1, 2, 2),
-      event = c(0, 1, 0, 1),
+      event = c(0L, 1L, 0L, 1L),
       time_to_event = c(1, 2, 1, 2),
-      exposure = c(0, 1, 0, 1),
+      exposure = c(0L, 1L, 0L, 1L),
       time_to_exposure = c(1, 2, 1, 2)
     )
   
     expect_error(
       create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
     )
+
+    df <- data.frame(
+      id = c(1.1123, 1.1124, 1.1123, 4),
+      event = c(0L, 1L, 0L, 1L),
+      time_to_event = c(1, 2, 1, 2),
+      exposure = c(0L, 1L, 0L, 1L),
+      time_to_exposure = c(1, 2, 1, 2)
+    )
+
+    expect_error(
+      create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    )
+
   
 })
 
@@ -85,14 +99,97 @@ test_that("the same column name is not passed >1 time", {
 
   df <- data.frame(
     id = c(1, 2, 3, 4),
-    event = c(0, 1, 0, 1),
+    event = c(0L, 1L, 0L, 1L),
     time_to_event = c(1, 2, 1, 2),
-    exposure = c(0, 1, 0, 1),
+    exposure = c(0L, 1L, 0L, 1L),
     time_to_exposure = c(1, 2, 1, 2)
   )
 
   expect_error(
     create_clones(df, id = "id", event = "event", time_to_event = "event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+  )
+
+})
+
+test_that("the respective columns have the right classes", {
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c('ham', 'is', 'good', 'food'),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(0L, 1L, 0L, 1L),
+    time_to_exposure = c(1, 2, 1, 2)
+  )
+
+  expect_error(
+    create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+  )
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(1.0, 1.0, 0.0, 1.0),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(0L, 1L, 0L, 1L),
+    time_to_exposure = c(1, 2, 1, 2)
+  )
+
+  expect_error(
+    create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+  )
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(0L, 1L, 0L, 1L),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(1.0, 1.0, 0.0, 1.0),
+    time_to_exposure = c(1, 2, 1, 2)
+  )
+
+  expect_error(
+    create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+  )
+
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(0L, 1L, 0L, 1L),
+    time_to_event = c('ham', 'is', 'great', 'food'),
+    exposure = c(0L, 1L, 0L, 1L),
+    time_to_exposure = c(1, 2, 1, 2)
+  )
+
+  expect_error(
+    create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+  )
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(0L, 1L, 0L, 1L),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(0L, 1L, 0L, 1L),
+    time_to_exposure = factor(c('ham', 'is', 'great', 'food'))
+  )
+
+  expect_error(
+    create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+  )
+
+})
+
+
+test_that("the results are populated without error", {
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(0L, 1L, 0L, 1L),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(T, T, F, T),
+    time_to_exposure = c(1, 2, 1, 2)
+  )
+
+  expect_equal(
+    class(create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")),
+    "data.frame"
   )
 
 })

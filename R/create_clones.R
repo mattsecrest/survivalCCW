@@ -59,6 +59,17 @@ create_clones <- function(
    if (NROW(unique(c(id, event, time_to_event, exposure, time_to_exposure))) != NROW(c(id, event, time_to_event, exposure, time_to_exposure))) {
       stop("You passed the same column name twice")
    }
+
+   # Check that the respective columns are numeric
+   checkmate::assert_numeric(df[, time_to_event])
+   checkmate::assert_numeric(df[, time_to_exposure])
+   checkmate::assert_true(class(df[,event]) %in% c("integer", "logical"))
+   checkmate::assert_true(class(df[,exposure]) %in% c("integer", "logical"))
+   checkmate::assert_true(class(df[,id]) %in% c("integer", "numeric", "character"))
+
+
+
+   return(df)
    
    
 
