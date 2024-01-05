@@ -45,6 +45,31 @@ test_that("when predvar columns are missing, an error is thrown", {
 
 })
 
+test_that("categorical vars are dealt with", {
+
+  toy_df_s <- toy_df
+  toy_df_s$sandwich <- rep(c("ham", "turkey", "cheese"), length.out = NROW(toy_df_s))
+
+  df_long <- toy_df_s |>
+    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2) |>
+    cast_clones_to_long()
+
+  expect_error(
+    generate_ccw_on_long_df(df_long, predvar = "sandwich")
+  )
+
+  df_long$sandwich_f <- factor(df_long$sandwich)
+
+  expect_error(
+    generate_ccw_on_long_df(df_long, predvar = "sandwich_f")
+  )
+
+  expect_error(
+    generate_ccw_on_long_df(df_long, predvar = NULL)
+  )
+
+})
+
 test_that("weights are adequately calculated", {
   expect_true(TRUE)
   #@TODO more test cases

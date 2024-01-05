@@ -55,4 +55,21 @@ generate_ccw_on_long_df <- function(df, predvar) {
       stop("predvar cannot be NULL. Please specify at least one variable to use for weights.")
    }
 
+   # Make sure no predvar are character/factor
+   if (any(sapply(df[, predvar], is.character) | sapply(df[, predvar], is.factor))) {
+      stop("At least one of the predvar columns is character/factor. In this early version of `survivalCCW`, only numeric variables are considered. Please make dummy vars on your own! :)")
+   }
+
+   # Now create weights
+   model_fmla <- as.formula(
+      paste0(
+         "survival::Surv(t_start, t_stop, censor) ~ ",
+         paste(predvar, collapse = " + ")
+      )
+   )
+
+   cens_model <- survival::coxph(model_fmla, data = df)
+
+   # 
+
 }
