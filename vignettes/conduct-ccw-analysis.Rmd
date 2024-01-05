@@ -58,7 +58,24 @@ The first step is to create the clones. This can be done for any time-to-event o
 - The time to exposure variable (in this case, `timetosurgery`)
 - The clinical eligibility window (in this case, we'll do `182.62` days, or 6 months). **Note you can also leave this blank and define the exposure and time-to-exposure within the clinical eligibility date yourself**.
 
-All other columns will be propogated for each patient.
+All other columns will be propogated for each patient. Let's see what this looks like in practice.
+
+```{r}
+
+# Create clones
+clones <- create_clones(
+  df = toy_df,
+  id = 'id',
+  event = 'death',
+  time_to_event = 'fup_obs',
+  exposure = 'surgery',
+  time_to_exposure = 'timetosurgery',
+  ced_window = 182.62
+)
+
+head(clones)
+
+```
 
 # Cast to long format
 

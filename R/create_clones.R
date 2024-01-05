@@ -44,10 +44,19 @@ create_clones <- function(
    # Check that all columns are in data
    checkmate::assert_subset(c(id, event, time_to_event, exposure, time_to_exposure), names(df))
 
-   # Check that there are no missing data in the study columns
-   cc_sum <- sum(complete.cases(df[, c(id, event, time_to_event, exposure, time_to_exposure)]))
+   # Check that there are no missing data in the study columns (except time to exposure)
+   cc_sum <- sum(complete.cases(df[, c(id, event, time_to_event, exposure)]))
    if (cc_sum != NROW(df)) {
       stop("There are missing data in the study columns")
+   }
+
+   # Check time to exposure is missing just for when exposure is 0/F
+   if (any(!is.na(df[df[, exposure] == 0L, time_to_exposure]))) {
+      stop("Time to exposure should only be for patients who received the exposure at some time")
+   }
+
+   if (any(is.na(df[df[, exposure] == 1L, time_to_exposure]))) {
+      stop("Time to exposure should be complete for patients who have exposure = 1")
    }
 
    # Check that the data is one-row-per-patient
