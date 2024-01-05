@@ -159,6 +159,7 @@ cast_clones_to_long <- function(df) {
    attributes(df_long)$exposure <- exposure
    attributes(df_long)$time_to_exposure <- time_to_exposure
    attributes(df_long)$ced_window <- ced_window
+   attributes(df_long)$event_times_df <- event_times_df
 
    return(df_long)
 }

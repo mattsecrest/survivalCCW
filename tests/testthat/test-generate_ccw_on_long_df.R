@@ -29,18 +29,18 @@ test_that("casting clones requires ccw_clones_long class", {
   )
 })
 
-test_that("when predvar columns are missing, an error is thrown", {
+test_that("when predvars columns are missing, an error is thrown", {
 
   df_long <- toy_df |>
     create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2) |>
     cast_clones_to_long()
 
   expect_error(
-    generate_ccw_on_long_df(df_long, predvar = "hamburger")
+    generate_ccw_on_long_df(df_long, predvars = "hamburger")
   )
 
   expect_error(
-    generate_ccw_on_long_df(df_long, predvar = NULL)
+    generate_ccw_on_long_df(df_long, predvars = NULL)
   )
 
 })
@@ -55,17 +55,17 @@ test_that("categorical vars are dealt with", {
     cast_clones_to_long()
 
   expect_error(
-    generate_ccw_on_long_df(df_long, predvar = "sandwich")
+    generate_ccw_on_long_df(df_long, predvars = "sandwich")
   )
 
   df_long$sandwich_f <- factor(df_long$sandwich)
 
   expect_error(
-    generate_ccw_on_long_df(df_long, predvar = "sandwich_f")
+    generate_ccw_on_long_df(df_long, predvars = "sandwich_f")
   )
 
   expect_error(
-    generate_ccw_on_long_df(df_long, predvar = NULL)
+    generate_ccw_on_long_df(df_long, predvars = NULL)
   )
 
 })

@@ -4,12 +4,12 @@
 \alias{generate_ccw_on_long_df}
 \title{Generate clone censor weights (CCW) on the long data.frame}
 \usage{
-generate_ccw_on_long_df(df, predvar)
+generate_ccw_on_long_df(df, predvars)
 }
 \arguments{
 \item{df}{A data.frame with one row per clone per observation period as returned by \code{\link[=cast_clones_to_long]{cast_clones_to_long()}}}
 
-\item{predvar}{The variables that will be used to derive weights (subset of those in your data.frame originally). At least one covariate must be used.}
+\item{predvars}{The variables that will be used to derive weights (subset of those in your data.frame originally). At least one covariate must be used.}
 }
 \value{
 The same data.frame with weights added.
