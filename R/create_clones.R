@@ -58,6 +58,16 @@ create_clones <- function(
       df[, time_to_exposure] <- ifelse(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] > ced_window, ced_window_na_type, df[, time_to_exposure])
    }
 
-   return(df)
+   # Create clones
+
+
+   df_clones <- df
+
+
+   # Add class
+   class(df_clones) <- c("clones", class(df_clones))
+
+   # Return
+   return(df_clones)
    
 }

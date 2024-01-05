@@ -231,3 +231,31 @@ test_that("protected column names are blocked", {
   )
 
 })
+
+test_that("exposure and event are just 0/1 or T/F", {
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(0L, 1L, 2L, 3L),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(1L, 1L, 0L, 1L),
+    time_to_exposure = c(1.1, 3.3, NA_real_, 3.3)
+  )
+
+  expect_error(
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = 200)
+  )
+
+  df <- data.frame(
+    id = c(1, 2, 3, 4),
+    event = c(0L, 0L, 0L, 0L),
+    time_to_event = c(1, 2, 1, 2),
+    exposure = c(0L, 1L, 2L, 3L),
+    time_to_exposure = c(NA_real_, 2.2, 3.3, 3.3)
+  )
+
+  expect_error(
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = 200)
+  )
+
+})
