@@ -61,7 +61,7 @@ create_clones <- function(
    # Create clones
    df_0 <- df_1 <- df
    df_0$outcome <- df_1$outcome <- rep(NA_integer_, NROW(df))
-   df_0$fup_outcome <- df_1$fup_coutcome <- rep(NA_real_, NROW(df))
+   df_0$fup_outcome <- df_1$fup_outcome <- rep(NA_real_, NROW(df))
    df_0$censor <- df_1$censor <- rep(NA_integer_, NROW(df))
    df_0$fup_censor <- df_1$fup_censor <- rep(NA_real_, NROW(df))
    df_0$clone <- 0L
@@ -103,6 +103,19 @@ create_clones <- function(
    ### Truly not exposed, true censorship on/after CED --> Censor at CED.
    df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "censor"] <- 1L
    df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "fup_censor"] <- ced_window
+
+   ## UNEXPOSED
+   ### Truly exposed --> Censored at time of exposure.
+   df_0[df_0[, exposure] == 1L, "censor"] <- 1L
+   df_0[df_0[, exposure] == 1L, "fup_censor"] <- df_0[df_0[, exposure] == 1L, time_to_exposure]
+
+   ### Truly not exposed, true censorship before/on CED --> Do not censor. Risk of censoring ends at event date
+   df_0[df_0[, exposure] == 0L & df_0[, time_to_event] <= ced_window, "censor"] <- 0L
+   df_0[df_0[, exposure] == 0L & df_0[, time_to_event] <= ced_window, "fup_censor"] <- df_0[df_0[, exposure] == 0L & df_0[, time_to_event] <= ced_window, time_to_event]
+
+   ### Truly not exposed, true censorship on/after CED --> Do not censor. Risk of censoring ends at CED.
+   df_0[df_0[, exposure] == 0L & df_0[, time_to_event] > ced_window, "censor"] <- 0L
+   df_0[df_0[, exposure] == 0L & df_0[, time_to_event] > ced_window, "fup_censor"] <- ced_window
 
    # Combine and return 
    df_clones <- rbind(df_1, df_0)
