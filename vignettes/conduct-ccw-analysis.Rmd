@@ -56,7 +56,7 @@ The first step is to create the clones. This can be done for any time-to-event o
 - The time to the first event (in this case, `fup_obs`)
 - The exposure variable, with exposure defined **at any time prior to censorship/event** (in this case, `surgery`). Must be (0) or (1),
 - The time to exposure variable (in this case, `timetosurgery`)
-- The clinical eligibility window (in this case, we'll do `182.62` days, or 6 months). **Note you can also leave this blank and define the exposure and time-to-exposure within the clinical eligibility date yourself**.
+- The clinical eligibility window (in this case, we'll do `182.62` days, or 6 months).
 
 All other columns will be propogated for each patient. Let's see what this looks like in practice.
 

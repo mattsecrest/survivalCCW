@@ -49,10 +49,13 @@ create_clones <- function(
 
    if (!valid_inputs) stop("something went wrong")
 
-   # Now create one-row-per-clone data.frame
+   # Update exposure and time-to-exposure based on CED window
+   if (!is.null(ced_window)) {
+      ced_window_na_type <- ifelse(is.integer(ced_window), NA_integer_, NA_real_)
+      df[, exposure] <- ifelse(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] <= ced_window, 1L, 0L)
+      df[, time_to_exposure] <- ifelse(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] <= ced_window, ced_window_na_type, df[, time_to_exposure])
+   }
 
    return(df)
    
-   
-
 }

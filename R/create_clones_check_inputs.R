@@ -6,7 +6,7 @@
 #' @param time_to_event The name of the column in `df` that contains the time to event.
 #' @param exposure The name of the column in `df` that contains the exposure.
 #' @param time_to_exposure The name of the column in `df` that contains the time to exposure.
-#' @param ced_window The date at which the clinical eligibility window closes. Can be left empty, in which case the clinical eligibility window is assumed to be part of 
+#' @param ced_window The date at which the clinical eligibility window closes. 
 #' `exposure` and `time_to_exposure`
 #' 
 #' @return TRUE if inputs are valid else false
@@ -17,7 +17,7 @@ create_clones_check_inputs <- function(
    time_to_event,
    exposure,
    time_to_exposure,
-   ced_window = NULL
+   ced_window
 ) {
 
    inputs_good <- FALSE 
@@ -29,7 +29,7 @@ create_clones_check_inputs <- function(
    checkmate::assert_class(time_to_event, "character")
    checkmate::assert_class(exposure, "character")
    checkmate::assert_class(time_to_exposure, "character")
-   checkmate::assert_class(ced_window, "numeric", null.ok = TRUE)
+   checkmate::assert_class(ced_window, "numeric")
 
    # Check that all columns are in data
    checkmate::assert_subset(c(id, event, time_to_event, exposure, time_to_exposure), names(df))

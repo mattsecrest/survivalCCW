@@ -11,7 +11,7 @@ create_clones_check_inputs(
   time_to_event,
   exposure,
   time_to_exposure,
-  ced_window = NULL
+  ced_window
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ create_clones_check_inputs(
 
 \item{time_to_exposure}{The name of the column in \code{df} that contains the time to exposure.}
 
-\item{ced_window}{The date at which the clinical eligibility window closes. Can be left empty, in which case the clinical eligibility window is assumed to be part of
+\item{ced_window}{The date at which the clinical eligibility window closes.
 \code{exposure} and \code{time_to_exposure}}
 }
 \value{
