@@ -59,10 +59,17 @@ create_clones <- function(
    }
 
    # Create clones
+   ## "exposed"
+   df_1 <- df
+   df_1$clone <- 1L
 
-
-   df_clones <- df
-
+   ## "unexposed"
+   df_0 <- df
+   df_0$clone <- 0L
+   
+   # Combine and return 
+   df_clones <- rbind(df_1, df_0)
+   df_clones <- df_clones[order(df_clones[, id], df_clones[, "clone"]), ]
 
    # Add class
    class(df_clones) <- c("clones", class(df_clones))
