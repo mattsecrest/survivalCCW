@@ -11,7 +11,13 @@
 #'   \item{fup_obs}{observed follow-up time (time to death or 1 year if censored alive)}
 #'   \item{death}{observed event of interest (all-cause death) 1: dead, 0:alive}
 #'   \item{timetosurgery}{time to surgery (NA if no surgery)}
-#'   ...
+#'   \item{age}{age at diagnosis}
+#'   \item{sex}{patient's sex}
+#'   \item{perf}{performance status at diagnosis}
+#'   \item{stage}{stage at diagnosis}
+#'   \item{deprivation}{deprivation score}
+#'   \item{charlson}{Charlson's comorbidity index}
+#'   \item{emergency}{route to diagnosis}
 #' }
 #' @source <https://doi.org/10.1093/ije/dyaa057>
 "maringe_tab"
