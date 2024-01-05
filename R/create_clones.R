@@ -50,10 +50,12 @@ create_clones <- function(
    if (!valid_inputs) stop("something went wrong")
 
    # Update exposure and time-to-exposure based on CED window
-   if (!is.null(ced_window)) {
+   n_pts_to_update <- sum(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] > ced_window)
+   if (n_pts_to_update > 0) {
+      message(paste0("Updating ", n_pts_to_update, " patients' exposure and time-to-exposure based on CED window"))
       ced_window_na_type <- ifelse(is.integer(ced_window), NA_integer_, NA_real_)
-      df[, exposure] <- ifelse(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] <= ced_window, 1L, 0L)
-      df[, time_to_exposure] <- ifelse(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] <= ced_window, ced_window_na_type, df[, time_to_exposure])
+      df[, exposure] <- ifelse(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] > ced_window, 0L, df[, exposure])
+      df[, time_to_exposure] <- ifelse(!is.na(df[, time_to_exposure]) &  df[, time_to_exposure] > ced_window, ced_window_na_type, df[, time_to_exposure])
    }
 
    return(df)
