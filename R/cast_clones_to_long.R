@@ -28,10 +28,10 @@ cast_clones_to_long <- function(df) {
    # Check inputs
    checkmate::assert_class(df, "ccw_clones")
    if (!all(c("outcome", "fup_outcome", "censor", "fup_censor", "clone") %in% names(df))) {
-      stop("The input data.frame is missing one of the required columns: outcome, fup_outcome, censor, fup_censor, clone. Did you remove this?")
+      stop("The input data.frame is missing at least one of the required columns: outcome, fup_outcome, censor, fup_censor, clone. Did you remove this?")
    }
    if (!all(c("id", "event", "time_to_event", "exposure", "time_to_exposure", "ced_window") %in% names(attributes(df)))) {
-      stop("The input data.frame is missing attributes: id, event, time_to_event, exposure, time_to_exposure, ced_window. Did you remove these or try to make a custom data.frame?")
+      stop("The input data.frame is missing at least one attribute: id, event, time_to_event, exposure, time_to_exposure, ced_window. Did you remove these or try to make a custom data.frame?")
    }
 
    id <- attributes(df)$id

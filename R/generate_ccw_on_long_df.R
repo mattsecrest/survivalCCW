@@ -3,7 +3,7 @@
 #' Currently, the only way to generate weights is via multivariable Cox, as described in Maringe et al. 2020
 #' 
 #' @param df A data.frame with one row per clone per observation period as returned by [cast_clones_to_long()]
-#' @param predvar The variables that will be used to derive weights (subset of those in your data.frame originally)
+#' @param predvar The variables that will be used to derive weights (subset of those in your data.frame originally). At least one covariate must be used.
 #' 
 #' @return The same data.frame with weights added.
 #' 
@@ -29,4 +29,30 @@
 #' @references Maringe, Camille, et al. "Reflection on modern methods: trial emulation in the presence of immortal-time bias. Assessing the benefit of major surgery for elderly lung cancer patients using observational data." International journal of epidemiology 49.5 (2020): 1719-1729.
 generate_ccw_on_long_df <- function(df, predvar) {
    
+   # Check inputs
+   checkmate::assert_class(df, "ccw_clones_long")
+   if (!all(c("outcome", "fup_outcome", "censor", "fup_censor", "clone", "t_start", "t_stop", "time_id", "t_event") %in% names(df))) {
+      stop("The input data.frame is missing at least one of the required columns: outcome, fup_outcome, censor, fup_censor, clone, t_start, t_stop, time_id, t_event. Did you remove this?")
+   }
+   if (!all(c("id", "event", "time_to_event", "exposure", "time_to_exposure", "ced_window") %in% names(attributes(df)))) {
+      stop("The input data.frame is missing at least one attribute: id, event, time_to_event, exposure, time_to_exposure, ced_window. Did you remove these or try to make a custom data.frame?")
+   }
+
+   id <- attributes(df)$id
+   event <- attributes(df)$event
+   exposure <- attributes(df)$exposure
+   time_to_event <- attributes(df)$time_to_event
+   time_to_exposure <- attributes(df)$time_to_exposure
+   ced_window <- attributes(df)$ced_window
+
+   # Check predvar to make sure the columns are there
+   if (!all(predvar %in% names(df))) {
+      stop("At least one of these predvar columns is not on the data.frame: ", paste(predvar, collapse = ", "), ".")
+   }
+
+   # Make sure predvar is not NULL
+   if (is.null(predvar)) {
+      stop("predvar cannot be NULL. Please specify at least one variable to use for weights.")
+   }
+
 }

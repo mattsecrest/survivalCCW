@@ -2,3 +2,4 @@
 
 export(cast_clones_to_long)
 export(create_clones)
+export(generate_ccw_on_long_df)
