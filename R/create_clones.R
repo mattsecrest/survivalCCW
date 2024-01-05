@@ -59,20 +59,33 @@ create_clones <- function(
    }
 
    # Create clones
-   ## "exposed"
-   df_1 <- df
+   df_0 <- df_1 <- df
+   df_0$outcome <- df_1$outcome <- rep(NA_integer_, NROW(df))
+   df_0$fup_outcome <- df_1$fup_coutcome <- rep(NA_real_, NROW(df))
+   df_0$censor <- df_1$censor <- rep(NA_integer_, NROW(df))
+   df_0$fup_censor <- df_1$fup_censor <- rep(NA_real_, NROW(df))
+   df_0$clone <- 0L
    df_1$clone <- 1L
 
-   ## "unexposed"
-   df_0 <- df
-   df_0$clone <- 0L
+   # Outcomes
+   ## Truly exposed --> keep outcomes
+   df_1[df_1[, exposure] == 1L, "outcome"] <- df_1[df_1[, exposure] == 1L, event]
+   df_1[df_1[, exposure] == 1L, "fup_outcome"] <- df_1[df_1[, exposure] == 1L, time_to_event]
    
+   ## Not exposed, follow-up ends before CED --> keep outcomes
+   df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, "outcome"] <- df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, event]
+   df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, "fup_outcome"] <- df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, time_to_event]
+
+   ## Not exposed, follow-up ends after CED --> censor
+   df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "outcome"] <- 0L
+   df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "fup_outcome"] <- ced_window
+
    # Combine and return 
    df_clones <- rbind(df_1, df_0)
    df_clones <- df_clones[order(df_clones[, id], df_clones[, "clone"]), ]
 
    # Add class
-   class(df_clones) <- c("clones", class(df_clones))
+   class(df_clones) <- c("ccw_clones", class(df_clones))
 
    # Return
    return(df_clones)

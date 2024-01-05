@@ -83,6 +83,11 @@ create_clones_check_inputs <- function(
       }
    }
 
+   # Check no outcomes are before exposure dates
+   if (any(df[, time_to_event] < df[, time_to_exposure])) {
+      stop("There are outcomes before exposure dates")
+   }
+
    inputs_good <- TRUE 
    
    return(inputs_good)
