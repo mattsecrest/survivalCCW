@@ -183,3 +183,53 @@ test_that("Spot check that censoring statuses are correctly assigned",{
   )
 
 })
+
+test_that("attribute are passed correctly", {
+
+  df <- data.frame(
+    id = 1:6,
+    event = c(1L, 1L, 1L, 1L, 1L, 1L),
+    time_to_event = c(10, 100, 100, 10, 100, 100),
+    exposure = c(rep(0L, 3), rep(1L, 3)),
+    time_to_exposure = c(rep(NA_real_, 3), 2, 8, 12)
+  )
+
+  ccw_df <- create_clones(df,
+                          id = "id", 
+                          event = "event", 
+                          time_to_event = "time_to_event", 
+                          exposure = "exposure", 
+                          time_to_exposure = "time_to_exposure", 
+                          ced_window = 20)
+
+  expect_equal(
+    attributes(ccw_df)$id,
+    "id"
+  )
+
+  expect_equal(
+    attributes(ccw_df)$event,
+    "event"
+  )
+
+  expect_equal(
+    attributes(ccw_df)$time_to_event,
+    "time_to_event"
+  )
+
+  expect_equal(
+    attributes(ccw_df)$exposure,
+    "exposure"
+  )
+
+  expect_equal(
+    attributes(ccw_df)$time_to_exposure,
+    "time_to_exposure"
+  )
+
+  expect_equal(
+    attributes(ccw_df)$ced_window,
+    20
+  )
+
+})

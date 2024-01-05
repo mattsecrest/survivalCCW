@@ -77,6 +77,13 @@ head(clones)
 
 ```
 
+
+Note that this object is just a `data.frame` with an additional custom class which future functions will evaluate:
+```{r}
+class(clones)
+```
+
+
 # Cast to long format
 
 

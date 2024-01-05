@@ -124,6 +124,14 @@ create_clones <- function(
    # Add class
    class(df_clones) <- c("ccw_clones", class(df_clones))
 
+   # Pass attributes
+   attributes(df_clones)$id <- id
+   attributes(df_clones)$event <- event
+   attributes(df_clones)$time_to_event <- time_to_event
+   attributes(df_clones)$exposure <- exposure
+   attributes(df_clones)$time_to_exposure <- time_to_exposure
+   attributes(df_clones)$ced_window <- ced_window
+
    # Return
    return(df_clones)
    
