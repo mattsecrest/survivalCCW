@@ -34,19 +34,19 @@ create_clones <- function(
 
    # Check all input types 
    checkmate::assert_class(df, "data.frame")
-   checkmate::assert_class(id, "character", "pass the name of the column in `df` that contains the patient identifier")
-   checkmate::assert_class(event, "character", "pass the name of the column in `df` that contains the event of interest")
-   checkmate::assert_class(time_to_event, "character", "pass the name of the column in `df` that contains the time to event")
-   checkmate::assert_class(exposure, "character", "pass the name of the column in `df` that contains the exposure")
-   checkmate::assert_class(time_to_exposure, "character", "pass the name of the column in `df` that contains the time to exposure")
-   checkmate::assert_class(ced_window, "numeric", "pass the date at which the clinical eligibility window closes. Can be left empty, in which case the clinical eligibility window is assumed to be part of `exposure` and `time_to_exposure`")
+   checkmate::assert_class(id, "character")
+   checkmate::assert_class(event, "character")
+   checkmate::assert_class(time_to_event, "character")
+   checkmate::assert_class(exposure, "character")
+   checkmate::assert_class(time_to_exposure, "character")
+   checkmate::assert_class(ced_window, "numeric", null.ok = TRUE)
 
    # Check that all columns are in data
    checkmate::assert_subset(c(id, event, time_to_event, exposure, time_to_exposure), names(df))
 
    # Check that there are no missing data in the study columns
-   df_cc <- complete.cases(df[, c(id, event, time_to_event, exposure, time_to_exposure)])
-   if (NROW(df_cc) != NROW(df)) {
+   cc_sum <- sum(complete.cases(df[, c(id, event, time_to_event, exposure, time_to_exposure)]))
+   if (cc_sum != NROW(df)) {
       stop("There are missing data in the study columns")
    }
 
@@ -55,6 +55,11 @@ create_clones <- function(
       stop("The data is not one-row-per-patient")
    }
 
+   # Make sure the user did not pass the same column name twice
+   if (NROW(unique(c(id, event, time_to_event, exposure, time_to_exposure))) != NROW(c(id, event, time_to_event, exposure, time_to_exposure))) {
+      stop("You passed the same column name twice")
+   }
+   
    
 
 }
