@@ -49,13 +49,17 @@ Note that this package addresses situations in which the covariates are all defi
 
 # Create clones
 
-The first step is to create the clones. This can be done for any time-to-event outcome (in the absence of competing risks) using the `survivalCCW` function `create_clones`. For `create_clones` to work, we need to pass a one-row-per-patient `data.frame` with the following columns:
+The first step is to create the clones. This can be done for any time-to-event outcome using the `survivalCCW` function `create_clones`. For `create_clones` to work, we need to pass a one-row-per-patient `data.frame` with the following columns:
 
-- The traditional outcome variable which denotes censorship (0) or event (1) (in this case, `death`)
-- The time to event variable (in this case, `fup_obs`)
+- The id variable (in this case, `id`)
+- The traditional outcome variable which denotes censorship (0) or event (1) (in this case, `death`). Note that additional values are permitted to facilitate competing risks analysis.
+- The time to the first event (in this case, `fup_obs`)
 - The exposure variable, with exposure defined **at any time prior to censorship/event** (in this case, `surgery`)
 - The time to exposure variable (in this case, `timetosurgery`)
-- The id variable (in this case, `id`)
+- The clinical eligibility window (in this case, we'll do `182.62` days, or 6 months). **Note you can also leave this blank and define the exposure and time-to-exposure within the clinical eligibility date yourself**.
 
 All other columns will be propogated for each patient.
 
+# Cast to long format
+
+# Bootstrap
