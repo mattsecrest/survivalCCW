@@ -6,11 +6,11 @@
 #' @param time_to_event The name of the column in `df` that contains the time to event.
 #' @param exposure The name of the column in `df` that contains the exposure.
 #' @param time_to_exposure The name of the column in `df` that contains the time to exposure.
-#' @param ced_windodw The date at which the clinical eligibility window closes. Can be left empty, in which case the clinical eligibility window is assumed to be part of 
+#' @param ced_window The date at which the clinical eligibility window closes. Can be left empty, in which case the clinical eligibility window is assumed to be part of 
 #' `exposure` and `time_to_exposure`
 #' 
 #' @return TRUE if inputs are valid else false
-check_inputs_create_clones <- function(
+create_clones_check_inputs <- function(
    df, 
    id,
    event,
@@ -35,7 +35,7 @@ check_inputs_create_clones <- function(
    checkmate::assert_subset(c(id, event, time_to_event, exposure, time_to_exposure), names(df))
 
    # Check that there are no missing data in the study columns (except time to exposure)
-   cc_sum <- sum(complete.cases(df[, c(id, event, time_to_event, exposure)]))
+   cc_sum <- sum(stats::complete.cases(df[, c(id, event, time_to_event, exposure)]))
    if (cc_sum != NROW(df)) {
       stop("There are missing data in the study columns")
    }

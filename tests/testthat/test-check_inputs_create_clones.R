@@ -9,19 +9,19 @@ test_that("input types correct", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = id, event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = id, event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = df$event, time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = df$event, time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = 2.0, exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = 2.0, exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event",  exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = "ced_window")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event",  exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = "ced_window")
   )
 
 })
@@ -37,15 +37,15 @@ test_that("columns are in data", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "hamburger", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "hamburger", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "sausage", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "sausage", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "pumpkin", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "pumpkin", time_to_exposure = "time_to_exposure")
   )
 
 })
@@ -61,7 +61,7 @@ test_that("no missing data exists in these columns (other than time to exposure)
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
 })
@@ -77,7 +77,7 @@ test_that("the data are one-row-per-patient", {
     )
   
     expect_error(
-      check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+      create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
     )
 
     df <- data.frame(
@@ -89,7 +89,7 @@ test_that("the data are one-row-per-patient", {
     )
 
     expect_error(
-      check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+      create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
     )
 
   
@@ -106,7 +106,7 @@ test_that("the same column name is not passed >1 time", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
 })
@@ -122,7 +122,7 @@ test_that("the respective columns have the right classes", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   df <- data.frame(
@@ -134,7 +134,7 @@ test_that("the respective columns have the right classes", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   df <- data.frame(
@@ -146,7 +146,7 @@ test_that("the respective columns have the right classes", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
 
@@ -159,7 +159,7 @@ test_that("the respective columns have the right classes", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   df <- data.frame(
@@ -171,7 +171,7 @@ test_that("the respective columns have the right classes", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
 })
@@ -187,7 +187,7 @@ test_that("for all pts with an exposure, time to exposure is complete", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
   df <- data.frame(
@@ -199,7 +199,7 @@ test_that("for all pts with an exposure, time to exposure is complete", {
   )
 
   expect_error(
-    check_inputs_create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
+    create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure")
   )
 
 })

@@ -27,7 +27,7 @@ create_clones(
 
 \item{time_to_exposure}{The name of the column in \code{df} that contains the time to exposure.}
 
-\item{ced_windodw}{The date at which the clinical eligibility window closes. Can be left empty, in which case the clinical eligibility window is assumed to be part of
+\item{ced_window}{The date at which the clinical eligibility window closes. Can be left empty, in which case the clinical eligibility window is assumed to be part of
 \code{exposure} and \code{time_to_exposure}}
 }
 \value{
@@ -42,5 +42,11 @@ Pass a one-row-per-patient data.frame and get back a data.frame with one row per
 data(toy_df)
 
 # Create clones
-clones <- create_clones(toy_df, id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2)
+clones <- create_clones(toy_df, 
+                        id = "id", 
+                        event = "death", 
+                        time_to_event = "fup_obs", 
+                        exposure = "surgery", 
+                        time_to_exposure = "timetosurgery", 
+                        ced_window = 365.25/2)
 }
