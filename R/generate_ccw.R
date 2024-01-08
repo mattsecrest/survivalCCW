@@ -24,10 +24,10 @@
 #'                         ced_window = 365.25/2)
 #' 
 #' clones_long <- cast_clones_to_long(clones)
-#' clones_long_w <- generate_ccw_on_long_df(clones_long)
+#' clones_long_w <- generate_ccw(clones_long, predvars = c("age"))
 #' 
 #' @references Maringe, Camille, et al. "Reflection on modern methods: trial emulation in the presence of immortal-time bias. Assessing the benefit of major surgery for elderly lung cancer patients using observational data." International journal of epidemiology 49.5 (2020): 1719-1729.
-generate_ccw_on_long_df <- function(df, predvars) {
+generate_ccw <- function(df, predvars) {
    
    # Check inputs
    checkmate::assert_class(df, "ccw_clones_long")
@@ -61,59 +61,26 @@ generate_ccw_on_long_df <- function(df, predvars) {
       stop("At least one of the predvars columns is character/factor. In this early version of `survivalCCW`, only numeric variables are considered. Please make dummy vars on your own! :)")
    }
 
-   # Now create weights
-   model_fmla <- as.formula(
+   # Create weights
+   model_fmla <- stats::as.formula(
       paste0(
          "survival::Surv(t_start, t_stop, censor) ~ ",
          paste(predvars, collapse = " + ")
       )
    )
 
-   cens_model <- survival::coxph(model_fmla, data = df)
+   df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], model_fmla, event_times_df, predvars)
 
-   #@TODO allow factors and carry forward through previous functions
-   df$lp <- as.matrix(df[, predvars]) %*% coef(cens_model)
-   baseline_hazard <- data.frame(
-      survival::basehaz(cens_model, centered = FALSE)
-   )
-   names(baseline_hazard) <- c("hazard", "t")
-   
-   dat_base_times <- unique(
-      merge(
-         x = baseline_hazard,
-         y = event_times_df,
-         by.x = "t",
-         by.y = "t_event",
-         all.x = TRUE
-      )
-   )
+   df_0 <- generate_ccw_calc_weights(df[df$clone == 0L, ], model_fmla, event_times_df, predvars)
 
-   df <- merge(
-      x = df, 
-      y = dat_base_times,
-      by = "time_id",
-      all.x = TRUE
-   )
+   # Combine 
+   df <- rbind(df_0, df_1)
 
-   ### LEFT OFF HERE
-   df<-df[order(df$id,df$fup_outcome),]
-   df$hazard<-ifelse(is.na(df$hazard),0,df$hazard)
-   df$their_p_uncens <-exp(-(df$hazard)*exp(df$their_lp))  
-   
-   
-   #Estimating the probability of remaining uncensored at each time of event
-   data.long$P_uncens<-exp(-(data.long$hazard)*exp(data.long$lin_pred))  
+   # Check that all clones have weights
+   if (any(is.na(df$weight_cox))) {
+      stop("At least one clone is missing a weight. Please file a bug fix.")
+   }
 
-
-
-   their_dl_merge <- merge(their_lp, event_times_df, by.x = )
-
-   lp <- predict(cens_model, newdata = df[, predvars, drop = FALSE], type = "lp")
-
-
-
-   dd<-data.frame(survival::basehaz(cens_model,centered=F))
-   names(dd)<-c("hazard","t")
-   dat.base<-unique(merge(dat.base,times,by.x="t",by.y="tevent",all.x=T))
+   return(df)
 
 }

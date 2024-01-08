@@ -12,6 +12,7 @@ RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,
+    boot,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Depends: 
@@ -19,6 +20,5 @@ Depends:
 LazyData: true
 Config/testthat/edition: 3
 Imports: 
-    boot,
     checkmate,
     survival

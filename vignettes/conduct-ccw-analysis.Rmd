@@ -102,6 +102,20 @@ clones_long[clones_long$id == "P5913", ]
 
 # Generate weights
 
+Now we simply need to generate the weights. The `survivalCCW` function `generate_ccw()` will do this for us.
 
+```{r}
+clones_long_weights <- generate_ccw(clones_long, predvars = c("age", "sex", "perf", "stage", "deprivation", "charlson", "emergency"))
+
+head(clones_long_weights)
+```
+
+Let's pick out a single patient and look at their data:
+
+```{r}
+clones_long_weights[clones_long_weights$id == "P5913", ]
+```
 
 # Bootstrap outcomes 
+
+Finally, we need to put this together in a bootstrapping function.
