@@ -149,8 +149,6 @@ cast_clones_to_long <- function(df) {
    
    df_long <- df_long[order(df_long[,id], df_long[, "clone"], df_long[, "fup_outcome"]), ]
 
-   rownames(df_long) <- NULL
-
    # Add attributes and return
    class(df_long) <- c("ccw_clones_long", class(df_long))
    attributes(df_long)$id <- id
@@ -160,6 +158,9 @@ cast_clones_to_long <- function(df) {
    attributes(df_long)$time_to_exposure <- time_to_exposure
    attributes(df_long)$ced_window <- ced_window
    attributes(df_long)$event_times_df <- event_times_df
+
+   # Remove rownames
+   rownames(df_long) <- NULL
 
    return(df_long)
 }

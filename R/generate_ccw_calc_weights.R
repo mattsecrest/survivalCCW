@@ -8,7 +8,7 @@
 #' @return a data.frame with weight columns included
 generate_ccw_calc_weights <- function(df, model_fmla, event_times_df, predvars) {
 
-   cens_model <- survival::coxph(model_fmla, data = df)
+   cens_model <- survival::coxph(model_fmla, data = df, ties = "efron")
 
    #@TODO allow factors and carry forward through previous functions
    df$lp <- as.matrix(df[, predvars]) %*% stats::coef(cens_model)

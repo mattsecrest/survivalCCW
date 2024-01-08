@@ -17,6 +17,7 @@ test_that("CED trims time to exposure appropriately", {
 
 })
 
+
 test_that("Spot check that outcomes are correctly assigned", {
 
   df <- data.frame(
@@ -181,6 +182,52 @@ test_that("Spot check that censoring statuses are correctly assigned",{
     ccw_df[ccw_df$id==2 & ccw_df$clone == 0, "fup_censor"],
     20
   )
+
+})
+
+test_that("Compare results to Maringe", {
+
+  df <- toy_df |>
+    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2)
+
+  load(system.file("tests/testthat/data/tab_maringe.RData", package = "survivalCCW"))
+
+  # Compare each 
+  for (id in unique(df$id)) {
+
+    # Get the clone
+    df_clone <- df[df$id == id, ]
+
+    # Get the tab_maringe clone
+    tab_maringe_clone <- tab[tab$id == id, ]
+
+    # Compare outcomes
+    expect_equal(
+      df_clone$outcome,
+      tab_maringe_clone$outcome
+    )
+
+    # Compare time to outcome
+    expect_equal(
+      df_clone$fup_outcome,
+      tab_maringe_clone$fup_outcome,
+      tolerance = 0.05
+    )
+
+    # Compare censoring
+    expect_equal(
+      df_clone$censor,
+      tab_maringe_clone$censor
+    )
+
+    # Compare time to censoring
+    expect_equal(
+      df_clone$fup_censor,
+      tab_maringe_clone$fup_censor,
+      tolerance = 0.05
+    )
+
+  }
 
 })
 

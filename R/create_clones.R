@@ -133,6 +133,9 @@ create_clones <- function(
    attributes(df_clones)$time_to_exposure <- time_to_exposure
    attributes(df_clones)$ced_window <- ced_window
 
+   # Remove rownames
+   rownames(df_clones) <- NULL
+
    # Return
    return(df_clones)
    
