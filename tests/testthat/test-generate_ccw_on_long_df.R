@@ -70,7 +70,61 @@ test_that("categorical vars are dealt with", {
 
 })
 
-test_that("weights are adequately calculated", {
-  expect_true(TRUE)
-  #@TODO more test cases
+test_that("weights are adequately calculated compared to Maringe", {
+  
+  df <- toy_df |>
+    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2) |>
+    cast_clones_to_long()
+
+  id <- attributes(df)$id
+  event <- attributes(df)$event
+  exposure <- attributes(df)$exposure
+  time_to_event <- attributes(df)$time_to_event
+  time_to_exposure <- attributes(df)$time_to_exposure
+  ced_window <- attributes(df)$ced_window
+  event_times_df <- attributes(df)$event_times_df
+
+  # Create weights
+  predvars <- c("age", "sex", "perf", "stage", "deprivation", "charlson", "emergency")
+  model_fmla <- stats::as.formula(
+    paste0(
+        "survival::Surv(t_start, t_stop, censor) ~ ",
+        paste(predvars, collapse = " + ")
+    )
+  )
+
+  df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], model_fmla, event_times_df, predvars)
+
+  df_0 <- generate_ccw_calc_weights(df[df$clone == 0L, ], model_fmla, event_times_df, predvars)
+
+  # Compare exposed
+  load(system.file("tests/testthat/data/data_long_maringe.RData", package = "survivalCCW"))
+
+  # Compare each 
+  for (id in unique(df$id)) {
+
+    # Get the clone
+    df_1_clone <- df_1[df_1$id == id, ]
+    df_1_clone <- df_1_clone[order(df_1_clone$time_id),]
+    row.names(df_1_clone) <- NULL
+
+    # Get the tab_maringe clone
+    data_long_maringe_clone <- data_long[data_long$id == id, ]
+    row.names(data_long_maringe_clone) <- NULL
+    
+    # @TODO speed this up
+    # Compare all columns
+    for (col in c("time_id", "lp", "t", "hazard", "p_uncens", "weight_cox")) {
+      row.names(df_1_clone[[col]]) <- NULL
+      row.names(data_long_maringe_clone[[col]]) <- NULL
+      expect_equal(
+        df_1_clone[[col]],
+        data_long_maringe_clone[[col]],
+        tolerance = 0.05
+      )
+    }
+
+  }
+  
 })
+
