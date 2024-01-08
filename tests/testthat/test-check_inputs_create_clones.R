@@ -66,35 +66,6 @@ test_that("no missing data exists in these columns (other than time to exposure)
 
 })
 
-test_that("the data are one-row-per-patient", {
-  
-    df <- data.frame(
-      id = c(1, 1, 2, 2),
-      event = c(0L, 1L, 0L, 1L),
-      time_to_event = c(100, 200, 100, 200),
-      exposure = c(0L, 1L, 0L, 1L),
-      time_to_exposure = c(NA_real_, 2.3, NA_real_, 3.3)
-    )
-  
-    expect_error(
-      create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = 200)
-    )
-
-    df <- data.frame(
-      id = c(1.1123, 1.1124, 1.1123, 4),
-      event = c(0L, 1L, 0L, 1L),
-      time_to_event = c(100, 200, 100, 200),
-      exposure = c(0L, 1L, 0L, 1L),
-      time_to_exposure = c(NA_real_, 2.3, NA_real_, 3.3)
-    )
-
-    expect_error(
-      create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = 200)
-    )
-
-  
-})
-
 test_that("the same column name is not passed >1 time", {
 
   df <- data.frame(

@@ -81,6 +81,9 @@ generate_ccw <- function(df, predvars) {
       stop("At least one clone is missing a weight. Please file a bug fix.")
    }
 
+   # Update class
+   class(df) <- c("ccw_clones_long", class(df))
+
    return(df)
 
 }

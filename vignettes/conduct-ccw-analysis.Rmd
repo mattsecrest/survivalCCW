@@ -118,4 +118,102 @@ print(clones_long_weights[clones_long_weights$id == "P5913", ], row.names = FALS
 
 # Evaluate outcomes 
 
-Finally, we need to put this together in a bootstrapping function.
+We now have everything we need to conduct a CCW analysis. For instance, we can pipe things together to evaluate the hazard ratio for surgery vs no surgery:
+
+```{r}
+library(survival)
+toy_df |>
+  create_clones(
+    id = 'id',
+    event = 'death',
+    time_to_event = 'fup_obs',
+    exposure = 'surgery',
+    time_to_exposure = 'timetosurgery',
+    ced_window = 365.25/2
+  ) |>
+  cast_clones_to_long() |>
+  generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency')) |>
+  coxph(Surv(t_start, t_stop, death) ~ clone, weights = weight_cox, data = _)
+
+```
+
+There is of course a problem with this analysis, as the cloning process renders the variance invalid. The simplest approach to addressing this is 
+to bootstrap the variance.
+
+```{r}
+library(boot)
+library(dplyr)
+
+boot_cox <- function(data, indices) {
+  
+  # Make long data.frame with weights
+  ccw_df <- data[indices, ] |>
+    create_clones(
+      id = 'id',
+      event = 'death',
+      time_to_event = 'fup_obs',
+      exposure = 'surgery',
+      time_to_exposure = 'timetosurgery',
+      ced_window = 365.25/2
+    ) |>
+    cast_clones_to_long() |>
+    generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency'))
+    
+
+  # Extract HR from CoxPH
+  hr <- ccw_df |>
+    coxph(Surv(t_start, t_stop, death) ~ clone, weights = weight_cox, data = _) |>
+    coef() |>
+    exp()
+
+  out <- c("hr" = hr)
+
+  # Create survfit objects for each of treated and untreated
+  surv_1 <- ccw_df[ccw_df$clone == 1, ] |>
+    survfit(Surv(t_start, t_stop, death) ~ 1L, weights = weight_cox, data = _)
+
+  surv_0 <- ccw_df[ccw_df$clone == 0, ] |>
+    survfit(Surv(t_start, t_stop, death) ~ 1L, weights = weight_cox, data = _)
+
+  # RMST difference
+  rmst_1 <- surv_1 |>
+    summary(rmean = 365.25) |>
+    (\(x) x$table)() |>
+    (\(x) x["rmean"])()
+  
+  rmst_0 <- surv_0 |>
+    summary(rmean = 365.25) |>
+    (\(x) x$table)() |>
+    (\(x) x["rmean"])()
+
+  rmst_diff <- rmst_1 - rmst_0
+
+  out <- c(out, "rmst_diff" = rmst_diff)
+
+  # 1-year survival difference
+  surv_1_1yr <- surv_1$surv[surv_1$time == max(surv_1$time)]
+  surv_0_1yr <- surv_0$surv[surv_0$time == max(surv_0$time)]
+
+  surv_diff_1yr <- surv_1_1yr - surv_0_1yr
+
+  out <- c(out, "surv_diff_1yr" = surv_diff_1yr)
+
+}
+
+boot_out <- boot(data = toy_df, statistic = boot_cox, R = 1000)
+```
+
+## Hazard ratios
+```{r}
+boot.ci(boot_out, type = "norm", index = 1)
+```
+
+## RMST
+```{r}
+boot.ci(boot_out, type = "norm", index = 2)
+```
+
+## 1-year survival
+```{r}
+boot.ci(boot_out, type = "norm", index = 3)
+```

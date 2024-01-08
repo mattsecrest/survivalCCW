@@ -58,11 +58,6 @@ create_clones_check_inputs <- function(
       stop("Event should be 0/1 or T/F")
    }
 
-   # Check that the data is one-row-per-patient
-   if (NROW(unique(df[, id])) != NROW(df)) {
-      stop("The data is not one-row-per-patient")
-   }
-
    # Make sure the user did not pass the same column name twice
    if (NROW(unique(c(id, event, time_to_event, exposure, time_to_exposure))) != NROW(c(id, event, time_to_event, exposure, time_to_exposure))) {
       stop("You passed the same column name twice")
