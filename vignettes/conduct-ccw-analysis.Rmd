@@ -91,13 +91,13 @@ No additional arguments are needed (the `clones` object is an artifact that allo
 ```{r}
 clones_long <- cast_clones_to_long(clones)
 
-head(clones_long)
+head(clones_long, row.names = FALSE)
 ```
 
 Let's pick out a single patient and look at their data:
 
 ```{r}
-clones_long[clones_long$id == "P5913", ]
+print(clones_long[clones_long$id == "P5913", ], row.names = FALSE)
 ```
 
 # Generate weights
@@ -107,15 +107,15 @@ Now we simply need to generate the weights. The `survivalCCW` function `generate
 ```{r}
 clones_long_weights <- generate_ccw(clones_long, predvars = c("age", "sex", "perf", "stage", "deprivation", "charlson", "emergency"))
 
-head(clones_long_weights)
+head(clones_long_weights, row.names = FALSE)
 ```
 
 Let's pick out a single patient and look at their data:
 
 ```{r}
-clones_long_weights[clones_long_weights$id == "P5913", ]
+print(clones_long_weights[clones_long_weights$id == "P5913", ], row.names = FALSE)
 ```
 
-# Bootstrap outcomes 
+# Evaluate outcomes 
 
 Finally, we need to put this together in a bootstrapping function.
