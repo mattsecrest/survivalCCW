@@ -70,7 +70,7 @@ clones <- create_clones(
   time_to_event = 'fup_obs',
   exposure = 'surgery',
   time_to_exposure = 'timetosurgery',
-  ced_window = 365.25/2
+  ced_window = 182.62
 )
 
 head(clones)
@@ -132,7 +132,7 @@ df <- toy_df |>
     ced_window = 365.25/2
   ) |>
   cast_clones_to_long() |>
-  generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency')) |>
+  generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency'))
 
 coxph(Surv(t_start, t_stop, death) ~ clone, data = df, weights = weight_cox)
 
@@ -155,7 +155,7 @@ boot_cox <- function(data, indices) {
       time_to_event = 'fup_obs',
       exposure = 'surgery',
       time_to_exposure = 'timetosurgery',
-      ced_window = 365.25/2
+      ced_window = 182.62
     ) |>
     cast_clones_to_long() |>
     generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency'))
