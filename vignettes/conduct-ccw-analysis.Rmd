@@ -138,7 +138,7 @@ coxph(Surv(t_start, t_stop, outcome) ~ clone, data = df, weights = weight_cox)
 
 ```
 
-There is of course a problem with this analysis, as the cloning process renders the variance invalid. The simplest approach to addressing this is 
+Note that we used `outcome` and not `death` in the `coxph()` model. Still, there is of course a problem with this analysis, as the cloning process renders the variance invalid. The simplest approach to addressing this is 
 to bootstrap the variance.
 
 ```{r}
@@ -162,7 +162,7 @@ boot_cox <- function(data, indices) {
     
 
   # Extract HR from CoxPH
-  cox_ccw <- coxph(Surv(t_start, t_stop, outcome) ~ clone, data = ccw_df, weights = weight_cox)
+  cox_ccw <- coxph(Surv(t_start, t_stop, outcome) ~ clone, data = ccw_df, weights = weight_cox) 
    
   hr <- cox_ccw |>
     coef() |>
@@ -191,8 +191,13 @@ boot_cox <- function(data, indices) {
   out <- c(out, "rmst_diff" = rmst_diff)
 
   # 1-year survival difference
-  surv_1_1yr <- surv_1$surv[surv_1$time == max(surv_1$time)]
-  surv_0_1yr <- surv_0$surv[surv_0$time == max(surv_0$time)]
+  # Find the index of the time point closest to 1 year
+  index_1yr_1 <- which.min(abs(surv_1$time - 365))
+  index_1yr_0 <- which.min(abs(surv_0$time - 365))
+
+  # Get the 1-year survival probabilities
+  surv_1_1yr <- surv_1$surv[index_1yr_1]
+  surv_0_1yr <- surv_0$surv[index_1yr_0]
 
   surv_diff_1yr <- surv_1_1yr - surv_0_1yr
 
@@ -200,7 +205,7 @@ boot_cox <- function(data, indices) {
 
 }
 
-boot_out <- boot(data = toy_df, statistic = boot_cox, R = 1000)
+boot_out <- boot(data = toy_df, statistic = boot_cox, R = 10)
 ```
 
 ## Hazard ratios
@@ -217,3 +222,10 @@ boot.ci(boot_out, type = "norm", index = 2)
 ```{r}
 boot.ci(boot_out, type = "norm", index = 3)
 ```
+
+# Putting it all together
+
+We created the function `ccw_analysis` to make this process easier. It is essentially a wrapper around the above 
+function.
+
+
