@@ -162,19 +162,18 @@ boot_cox <- function(data, indices) {
     
 
   # Extract HR from CoxPH
-  hr <- ccw_df |>
-    coxph(Surv(t_start, t_stop, death) ~ clone, weights = weight_cox, data = _) |>
+  cox_ccw <- coxph(Surv(t_start, t_stop, death) ~ clone, data = ccw_df, weights = weight_cox)
+   
+  hr <- cox_ccw |>
     coef() |>
     exp()
 
   out <- c("hr" = hr)
 
   # Create survfit objects for each of treated and untreated
-  surv_1 <- ccw_df[ccw_df$clone == 1, ] |>
-    survfit(Surv(t_start, t_stop, death) ~ 1L, weights = weight_cox, data = _)
+  surv_1 <- survfit(Surv(t_start, t_stop, death) ~ 1L, data = ccw_df[ccw_df$clone == 1, ], weights = weight_cox)
 
-  surv_0 <- ccw_df[ccw_df$clone == 0, ] |>
-    survfit(Surv(t_start, t_stop, death) ~ 1L, weights = weight_cox, data = _)
+  surv_0 <- survfit(Surv(t_start, t_stop, death) ~ 1L, data = ccw_df[ccw_df$clone == 0, ], weights = weight_cox)
 
   # RMST difference
   rmst_1 <- surv_1 |>
