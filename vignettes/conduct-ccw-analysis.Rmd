@@ -122,7 +122,7 @@ We now have everything we need to conduct a CCW analysis. For instance, we can p
 
 ```{r}
 library(survival)
-toy_df |>
+df <- toy_df |>
   create_clones(
     id = 'id',
     event = 'death',
@@ -133,7 +133,8 @@ toy_df |>
   ) |>
   cast_clones_to_long() |>
   generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency')) |>
-  coxph(Surv(t_start, t_stop, death) ~ clone, weights = weight_cox, data = _)
+
+coxph(Surv(t_start, t_stop, death) ~ clone, data = df, weights = weight_cox)
 
 ```
 
