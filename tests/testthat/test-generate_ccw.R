@@ -24,6 +24,16 @@ test_that("weights are adequately calculated compared to Maringe", {
       tolerance = 1e-6
     )
   }
+
+  cox_df <- survival::coxph(survival::Surv(t_start, t_stop, outcome) ~ clone, data = df)
+  cox_data_long_cox <- survival::coxph(survival::Surv(t_start, t_stop, outcome) ~ clone, data = data_long_cox)
+
+  expect_equal(cox_df$coefficients, cox_data_long_cox$coefficients, tolerance = 1e-6)
+
+  load(system.file("tests/testthat/data/data.long.Cox_maringe.RData", package = "survivalCCW"))
+
+  cox.data.long.Cox <- survival::coxph(survival::Surv(Tstart, Tstop, outcome) ~ arm, data = data.long.Cox)
   
 })
+
 
