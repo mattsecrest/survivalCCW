@@ -4,12 +4,10 @@
 \alias{generate_ccw_calc_weights}
 \title{Calculate weights for each arm of a long data.frame}
 \usage{
-generate_ccw_calc_weights(df, model_fmla, event_times_df, predvars)
+generate_ccw_calc_weights(df, event_times_df, predvars)
 }
 \arguments{
 \item{df}{the data.frame for a single arm}
-
-\item{model_fmla}{the formula for the Cox model}
 
 \item{event_times_df}{the event times data.frame}
 

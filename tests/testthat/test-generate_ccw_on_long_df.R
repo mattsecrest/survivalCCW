@@ -105,7 +105,7 @@ test_that("weights are adequately calculated compared to Maringe", {
   row.names(data_long_2) <- NULL
 
   # Compare all columns
-  for (col in c("time_id", "lp", "t", "hazard")) {
+  for (col in c("time_id", "lp", "t", "hazard", "p_uncens", "weight_cox")) {
     row.names(df_1[[col]]) <- NULL
     row.names(data_long[[col]]) <- NULL
     expect_equal(
@@ -116,7 +116,7 @@ test_that("weights are adequately calculated compared to Maringe", {
   }
 
   # Compare all columns
-  for (col in c("time_id", "lp", "t", "hazard")) {
+  for (col in c("time_id", "lp", "t", "hazard", "p_uncens", "weight_cox")) {
     row.names(df_0[[col]]) <- NULL
     row.names(data_long_2[[col]]) <- NULL
     expect_equal(

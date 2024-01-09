@@ -62,11 +62,9 @@ generate_ccw <- function(df, predvars) {
    }
 
    # Create weights
+   df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], event_times_df, predvars)
 
-
-   df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], model_fmla, event_times_df, predvars)
-
-   df_0 <- generate_ccw_calc_weights(df[df$clone == 0L, ], model_fmla, event_times_df, predvars)
+   df_0 <- generate_ccw_calc_weights(df[df$clone == 0L, ], event_times_df, predvars)
 
    # Combine 
    df <- rbind(df_0, df_1)
