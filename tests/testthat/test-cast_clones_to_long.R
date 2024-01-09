@@ -55,7 +55,7 @@ test_that("Compare results to Maringe", {
     expect_equal(
       df[[col]],
       data_final[[col]],
-      tolerance = 0.001
+      tolerance = 1e-6
     )
   }
 

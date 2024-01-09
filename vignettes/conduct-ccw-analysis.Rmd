@@ -177,12 +177,12 @@ boot_cox <- function(data, indices) {
 
   # RMST difference
   rmst_1 <- surv_1 |>
-    summary(rmean = 365.25) |>
+    summary(rmean = 365) |>
     (\(summary) summary$table)() |>
     (\(table) table["rmean"])()
   
   rmst_0 <- surv_0 |>
-    summary(rmean = 365.25) |>
+    summary(rmean = 365) |>
     (\(summary) summary$table)() |>
     (\(table) table["rmean"])()
 

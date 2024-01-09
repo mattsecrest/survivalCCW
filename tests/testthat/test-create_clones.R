@@ -188,7 +188,7 @@ test_that("Spot check that censoring statuses are correctly assigned",{
 test_that("Compare results to Maringe", {
 
   df <- toy_df |>
-    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2)
+    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 182.62)
   df <- df[order(df$id, df$clone),]
 
   load(system.file("tests/testthat/data/tab_maringe.RData", package = "survivalCCW"))
@@ -201,7 +201,7 @@ test_that("Compare results to Maringe", {
     expect_equal(
       df[[col]],
       tab[[col]],
-      tolerance = 0.05
+      tolerance = 1e-6
     )
   }
 

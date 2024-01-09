@@ -111,7 +111,7 @@ test_that("weights are adequately calculated compared to Maringe", {
     expect_equal(
       df_1[[col]],
       data_long[[col]],
-      tolerance = 0.001
+      tolerance = 1e-6
     )
   }
 
@@ -122,7 +122,7 @@ test_that("weights are adequately calculated compared to Maringe", {
     expect_equal(
       df_0[[col]],
       data_long_2[[col]],
-      tolerance = 0.001
+      tolerance = 1e-6
     )
   }
   
