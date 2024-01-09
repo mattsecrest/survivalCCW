@@ -75,7 +75,7 @@ generate_ccw <- function(df, predvars) {
    }
 
    # Update class
-   class(df) <- c("ccw_clones_long", class(df))
+   class(df) <- c("ccw_clones_long_weights", class(df))
 
    # Remove rownames
    rownames(df) <- NULL
