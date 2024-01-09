@@ -191,7 +191,6 @@ test_that("Compare results to Maringe", {
     create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 182.62)
   df <- df[order(df$id, df$clone),]
 
-  load(system.file("tests/testthat/data/tab_maringe.RData", package = "survivalCCW"))
   tab <- tab[order(tab$id, tab$clone),]
 
   # Compare each 

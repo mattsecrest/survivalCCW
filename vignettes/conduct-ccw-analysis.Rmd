@@ -143,7 +143,6 @@ to bootstrap the variance.
 
 ```{r}
 library(boot)
-library(dplyr)
 
 boot_cox <- function(data, indices) {
   

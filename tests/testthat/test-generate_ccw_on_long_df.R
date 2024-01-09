@@ -96,11 +96,9 @@ test_that("weights are adequately calculated compared to Maringe", {
   row.names(df_0) <- NULL
 
   # Compare exposed
-  load(system.file("tests/testthat/data/data_long_maringe.RData", package = "survivalCCW"))
   data_long <- data_long[order(data_long$id, data_long$time_id),]
   row.names(data_long) <- NULL
 
-  load(system.file("tests/testthat/data/data_long_2_maringe.RData", package = "survivalCCW"))
   data_long_2 <- data_long_2[order(data_long_2$id, data_long_2$time_id),]
   row.names(data_long_2) <- NULL
 

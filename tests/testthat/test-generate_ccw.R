@@ -10,7 +10,6 @@ test_that("weights are adequately calculated compared to Maringe", {
   row.names(df) <- NULL
 
   # Compare exposed
-  load(system.file("tests/testthat/data/data_long_cox_maringe.RData", package = "survivalCCW"))
   data_long_cox <- data_long_cox[order(data_long_cox$id, data_long_cox$clone, data_long_cox$time_id),]
   row.names(data_long_cox) <- NULL
 

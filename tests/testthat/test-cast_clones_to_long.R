@@ -47,7 +47,6 @@ test_that("Compare results to Maringe", {
   df <- df[order(df$id, df$clone, df$time_id),]
   row.names(df) <- NULL
 
-  load(system.file("tests/testthat/data/data_final_maringe.RData", package = "survivalCCW"))
   data_final <- data_final[order(data_final$id, data_final$clone, data_final$time_id),]
   row.names(data_final) <- NULL
   
