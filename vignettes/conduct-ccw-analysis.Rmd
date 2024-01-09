@@ -1,0 +1,222 @@
+---
+title: "How to Conduct a Clone Censor-Weight Survival Analysis using survivalCCW"
+author: Matthew Secrest
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How to Conduct a Clone Censor-Weight Survival Analysis using survivalCCW}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Clone Censor Weighting
+
+This lightweight package describes how to conduct clone-censor weighting (CCW) to address the problem of immortal time bias in survival analysis. This vignette will walk through the applied tutorial published by [Maringe et al 2020](https://academic.oup.com/ije/article/49/5/1719/5835351). Refer to [Hernan and Robins 2016](https://doi.org/10.1093/aje/kwv254) and [Hernan et al 2016](https://doi.org/10.1016/j.jclinepi.2016.04.014) for more technical details.
+
+# Context
+
+CCW is useful in the presence of immortal person-time bias in observational studies. For instance, when comparing surgery recipients vs non-recipients in non-small cell lung cancer (NSCLC), the surgery group will have a longer survival time than the non-surgery group because the non-surgery group includes patients who died before they could receive surgery. This is a form of immortal time bias.
+
+The CCW toy dataset published by Maringe uses this exact setting as the motivating example. Let's explore the dataset, which comes with `survivalCCW`.
+
+```{r}
+library(survivalCCW)
+head(toy_df)
+```
+
+Column descriptions can be found with `?toy_df`:
+
+- `id`: patient identifier
+- `fup_obs`: observed follow-up time (time to death or 1 year if censored alive)
+- `death`: observed event of interest (all-cause death) 1: dead, 0: alive
+- `timetosurgery`: time to surgery (NA if no surgery)
+- `age`: age at diagnosis
+- `sex`: patient's sex
+- `perf`: performance status at diagnosis
+- `stage`: stage at diagnosis
+- `deprivation`: deprivation score
+- `charlson`: Charlson's comorbidity index
+- `emergency`: route to diagnosis
+
+Note that this package addresses situations in which the covariates are all defined at baseline.
+
+# Create clones
+
+The first step is to create the clones. This can be done for any time-to-event outcome using the `survivalCCW` function `create_clones`. For `create_clones` to work, we need to pass a one-row-per-patient `data.frame` with the following columns:
+
+- The id variable (in this case, `id`)
+- The traditional outcome variable which denotes censorship (0) or event (1) (in this case, `death`). Note that additional values are not yet permitted.
+- The time to the first event (in this case, `fup_obs`)
+- The exposure variable, with exposure defined **at any time prior to censorship/event** (in this case, `surgery`). Must be (0) or (1),
+- The time to exposure variable (in this case, `timetosurgery`)
+- The clinical eligibility window (in this case, we'll do 6 months)
+
+All other columns will be propogated for each patient. Let's see what this looks like in practice.
+
+```{r}
+
+# Create clones
+clones <- create_clones(
+  df = toy_df,
+  id = 'id',
+  event = 'death',
+  time_to_event = 'fup_obs',
+  exposure = 'surgery',
+  time_to_exposure = 'timetosurgery',
+  ced_window = 182.62
+)
+
+head(clones)
+```
+
+
+Note that this object is just a `data.frame` with an additional custom class which future functions will evaluate:
+```{r}
+class(clones)
+```
+
+
+# Cast to long format
+Now we simply need to cast the data to long format. The `survivalCCW` function `cast_to_long` will do this for us. 
+No additional arguments are needed (the `clones` object is an artifact that allows you to better see and understand the method):
+
+```{r}
+clones_long <- cast_clones_to_long(clones)
+
+head(clones_long, row.names = FALSE)
+```
+
+Let's pick out a single patient and look at their data:
+
+```{r}
+print(clones_long[clones_long$id == "P5913", ], row.names = FALSE)
+```
+
+# Generate weights
+
+Now we simply need to generate the weights. The `survivalCCW` function `generate_ccw()` will do this for us.
+
+```{r}
+clones_long_weights <- generate_ccw(clones_long, predvars = c("age", "sex", "perf", "stage", "deprivation", "charlson", "emergency"))
+
+head(clones_long_weights, row.names = FALSE)
+```
+
+Let's pick out a single patient and look at their data:
+
+```{r}
+print(clones_long_weights[clones_long_weights$id == "P5913", ], row.names = FALSE)
+```
+
+# Evaluate outcomes 
+
+We now have everything we need to conduct a CCW analysis. For instance, we can pipe things together to evaluate the hazard ratio for surgery vs no surgery:
+
+```{r}
+library(survival)
+df <- toy_df |>
+  create_clones(
+    id = 'id',
+    event = 'death',
+    time_to_event = 'fup_obs',
+    exposure = 'surgery',
+    time_to_exposure = 'timetosurgery',
+    ced_window = 365.25/2
+  ) |>
+  cast_clones_to_long() |>
+  generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency'))
+
+coxph(Surv(t_start, t_stop, outcome) ~ clone, data = df, weights = weight_cox)
+
+```
+
+Note that we used `outcome` and not `death` in the `coxph()` model. Still, there is of course a problem with this analysis, as the cloning process renders the variance invalid. The simplest approach to addressing this is 
+to bootstrap the variance. I have not made a function to do this yet, but leave the below as an example of how to do this.
+
+```{r}
+library(boot)
+
+boot_cox <- function(data, indices) {
+  
+  # Make long data.frame with weights
+  ccw_df <- data[indices, ] |>
+    create_clones(
+      id = 'id',
+      event = 'death',
+      time_to_event = 'fup_obs',
+      exposure = 'surgery',
+      time_to_exposure = 'timetosurgery',
+      ced_window = 182.62
+    ) |>
+    cast_clones_to_long() |>
+    generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency'))
+    
+
+  # Extract HR from CoxPH
+  cox_ccw <- coxph(Surv(t_start, t_stop, outcome) ~ clone, data = ccw_df, weights = weight_cox) 
+   
+  hr <- cox_ccw |>
+    coef() |>
+    exp()
+
+  out <- c("hr" = hr)
+
+  # Create survfit objects for each of treated and untreated
+  surv_1 <- survfit(Surv(t_start, t_stop, outcome) ~ 1L, data = ccw_df[ccw_df$clone == 1, ], weights = weight_cox)
+
+  surv_0 <- survfit(Surv(t_start, t_stop, outcome) ~ 1L, data = ccw_df[ccw_df$clone == 0, ], weights = weight_cox)
+
+  # RMST difference
+  rmst_1 <- surv_1 |>
+    summary(rmean = 365) |>
+    (\(summary) summary$table)() |>
+    (\(table) table["rmean"])()
+  
+  rmst_0 <- surv_0 |>
+    summary(rmean = 365) |>
+    (\(summary) summary$table)() |>
+    (\(table) table["rmean"])()
+
+  rmst_diff <- rmst_1 - rmst_0
+
+  out <- c(out, "rmst_diff" = rmst_diff)
+
+  # 1-year survival difference
+  # Find the index of the time point closest to 1 year
+  index_1yr_1 <- which.min(abs(surv_1$time - 365))
+  index_1yr_0 <- which.min(abs(surv_0$time - 365))
+
+  # Get the 1-year survival probabilities
+  surv_1_1yr <- surv_1$surv[index_1yr_1]
+  surv_0_1yr <- surv_0$surv[index_1yr_0]
+
+  surv_diff_1yr <- surv_1_1yr - surv_0_1yr
+
+  out <- c(out, "surv_diff_1yr" = surv_diff_1yr)
+
+}
+
+boot_out <- boot(data = toy_df, statistic = boot_cox, R = 10)
+```
+
+## Hazard ratios
+```{r}
+boot.ci(boot_out, type = "norm", index = 1)
+```
+
+## RMST
+```{r}
+boot.ci(boot_out, type = "norm", index = 2)
+```
+
+## 1-year survival
+```{r}
+boot.ci(boot_out, type = "norm", index = 3)
+```
