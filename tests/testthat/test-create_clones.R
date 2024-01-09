@@ -189,44 +189,20 @@ test_that("Compare results to Maringe", {
 
   df <- toy_df |>
     create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2)
+  df <- df[order(df$id, df$clone),]
 
   load(system.file("tests/testthat/data/tab_maringe.RData", package = "survivalCCW"))
+  tab <- tab[order(tab$id, tab$clone),]
 
   # Compare each 
-  for (id in unique(df$id)) {
-
-    # Get the clone
-    df_clone <- df[df$id == id, ]
-
-    # Get the tab_maringe clone
-    tab_maringe_clone <- tab[tab$id == id, ]
-
-    # Compare outcomes
+  for (col in c("outcome", "fup_outcome", "censor", "fup_censor")) {
+    row.names(df) <- NULL
+    row.names(tab) <- NULL
     expect_equal(
-      df_clone$outcome,
-      tab_maringe_clone$outcome
-    )
-
-    # Compare time to outcome
-    expect_equal(
-      df_clone$fup_outcome,
-      tab_maringe_clone$fup_outcome,
+      df[[col]],
+      tab[[col]],
       tolerance = 0.05
     )
-
-    # Compare censoring
-    expect_equal(
-      df_clone$censor,
-      tab_maringe_clone$censor
-    )
-
-    # Compare time to censoring
-    expect_equal(
-      df_clone$fup_censor,
-      tab_maringe_clone$fup_censor,
-      tolerance = 0.05
-    )
-
   }
 
 })

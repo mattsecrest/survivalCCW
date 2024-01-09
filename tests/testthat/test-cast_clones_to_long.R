@@ -44,30 +44,19 @@ test_that("Compare results to Maringe", {
     create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2) |>
     cast_clones_to_long()
 
+  df <- df[order(df$id, df$clone, df$time_id),]
+  row.names(df) <- NULL
+
   load(system.file("tests/testthat/data/data_final_maringe.RData", package = "survivalCCW"))
-
-  # Compare each 
-  for (id in unique(df$id)) {
-
-    # Get the clone
-    df_clone <- df[df$id == id, c("time_id", "t_start", "t_stop", "censor", "fup_censor", "clone", "outcome", "fup_outcome")]
-    df_clone <- df_clone[order(df_clone$clone, df_clone$time_id),]
-    row.names(df_clone) <- NULL
-
-    # Get the tab_maringe clone
-    tab_maringe_clone <- data_final[data_final$id == id, c("time_id", "t_start", "t_stop", "censor", "fup_censor", "clone", "outcome", "fup_outcome")]
-    tab_maringe_clone <- tab_maringe_clone[order(tab_maringe_clone$clone, tab_maringe_clone$time_id),]
-    row.names(tab_maringe_clone) <- NULL
-
-    # @TODO speed this up
-    # Compare all columns
-    for (col in names(df_clone)) {
-      expect_equal(
-        df_clone[[col]],
-        tab_maringe_clone[[col]],
-        tolerance = 0.05
-      )
-    }
+  data_final <- data_final[order(data_final$id, data_final$clone, data_final$time_id),]
+  row.names(data_final) <- NULL
+  
+  for (col in names(df)) {
+    expect_equal(
+      df[[col]],
+      data_final[[col]],
+      tolerance = 0.05
+    )
   }
 
 })

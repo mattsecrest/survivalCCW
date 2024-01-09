@@ -38,6 +38,7 @@ generate_ccw_calc_weights <- function(df, model_fmla, event_times_df, predvars) 
    df$hazard <- ifelse(is.na(df$hazard), 0, df$hazard)
    df$p_uncens <- exp(-(df$hazard) * exp(df$lp))
    df$weight_cox  <- 1 / df$p_uncens
+   df$weight_cox[df$time_id==0] <- 0
 
    row.names(df) <- NULL   
    return(df)
