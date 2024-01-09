@@ -1,16 +1,23 @@
 #' Calculate weights for each arm of a long data.frame
 #' 
 #' @param df the data.frame for a single arm
-#' @param model_fmla the formula for the Cox model
 #' @param event_times_df the event times data.frame
 #' @param predvars the baseline variables for adjustment
 #' 
 #' @return a data.frame with weight columns included
-generate_ccw_calc_weights <- function(df, model_fmla, event_times_df, predvars) {
+generate_ccw_calc_weights <- function(df,  event_times_df, predvars) {
+
+   model_fmla <- stats::as.formula(
+      paste0(
+         "survival::Surv(t_start, t_stop, censor) ~ ",
+         paste(predvars, collapse = " + ")
+      )
+   )
 
    cens_model <- survival::coxph(model_fmla, data = df, ties = "efron")
 
    #@TODO allow factors and carry forward through previous functions
+   # ref_df <- setNames(data.frame(matrix(0, nrow = 1, ncol = length(predvars))), predvars)
    df$lp <- as.matrix(df[, predvars]) %*% stats::coef(cens_model)
    baseline_hazard <- data.frame(
       survival::basehaz(cens_model, centered = FALSE)

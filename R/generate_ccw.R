@@ -62,12 +62,7 @@ generate_ccw <- function(df, predvars) {
    }
 
    # Create weights
-   model_fmla <- stats::as.formula(
-      paste0(
-         "survival::Surv(t_start, t_stop, censor) ~ ",
-         paste(predvars, collapse = " + ")
-      )
-   )
+
 
    df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], model_fmla, event_times_df, predvars)
 

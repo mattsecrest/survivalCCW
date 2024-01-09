@@ -73,7 +73,7 @@ test_that("categorical vars are dealt with", {
 test_that("weights are adequately calculated compared to Maringe", {
   
   df <- toy_df |>
-    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 365.25/2) |>
+    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 182.62) |>
     cast_clones_to_long()
 
   id <- attributes(df)$id
@@ -86,18 +86,12 @@ test_that("weights are adequately calculated compared to Maringe", {
 
   # Create weights
   predvars <- c("age", "sex", "perf", "stage", "deprivation", "charlson", "emergency")
-  model_fmla <- stats::as.formula(
-    paste0(
-        "survival::Surv(t_start, t_stop, censor) ~ ",
-        paste(predvars, collapse = " + ")
-    )
-  )
 
-  df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], model_fmla, event_times_df, predvars)
+  df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], event_times_df, predvars)
   df_1 <- df_1[order(df_1$id, df_1$time_id),]
   row.names(df_1) <- NULL
 
-  df_0 <- generate_ccw_calc_weights(df[df$clone == 0L, ], model_fmla, event_times_df, predvars)
+  df_0 <- generate_ccw_calc_weights(df[df$clone == 0L, ], event_times_df, predvars)
   df_0 <- df_0[order(df_0$id, df_0$time_id),]
   row.names(df_0) <- NULL
 
@@ -117,7 +111,7 @@ test_that("weights are adequately calculated compared to Maringe", {
     expect_equal(
       df_1[[col]],
       data_long[[col]],
-      tolerance = 0.05
+      tolerance = 0.001
     )
   }
 
@@ -128,34 +122,9 @@ test_that("weights are adequately calculated compared to Maringe", {
     expect_equal(
       df_0[[col]],
       data_long_2[[col]],
-      tolerance = 0.05
+      tolerance = 0.001
     )
   }
-  
-#   # Compare each in df_0
-  # for (id in unique(df$id)) {
-
-    # # Get the clone
-    # df_0_clone <- df_0[df_0$id == id, ]
-    # df_0_clone <- df_0_clone[order(df_0_clone$time_id),]
-    # row.names(df_0_clone) <- NULL
-
-    # # Get the tab_maringe clone
-    # data_long_2_maringe_clone <- data_long_2[data_long_2$id == id, ]
-    # row.names(data_long_2_maringe_clone) <- NULL
-    
-    # # @TODO speed this up
-    # # Compare all columns
-    # for (col in c("time_id", "lp", "t", "hazard")) {
-      # row.names(df_0_clone[[col]]) <- NULL
-      # row.names(data_long_2_maringe_clone[[col]]) <- NULL
-      # expect_equal(
-        # df_0_clone[[col]],
-        # data_long_2_maringe_clone[[col]],
-        # tolerance = 0.05
-      # )
-    # }
-  # }
   
 })
 
