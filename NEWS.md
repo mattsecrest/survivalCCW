@@ -1,3 +1,3 @@
-# survivalCCW 0.0.0.9000
+# survivalCCW 0.0.1
 
 * Initial functionality and CRAN submission

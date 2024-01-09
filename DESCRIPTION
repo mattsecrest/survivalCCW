@@ -1,10 +1,10 @@
 Package: survivalCCW
-Title: This package uses clone censor weighting (CCW)
-Version: 0.0.0.9000
+Title: An R Package for Clone Censor Weighting (CCW) Survival Analyses
+Version: 0.0.1
 Authors@R: 
     person("Matthew", "Secrest", , "secrmatt@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0939-4902"))
-Description: What the package does (one paragraph).
+Description: This is a work-in-progress package that conducts clone censor weight analyses in R. Please use at your own risk. Consider filing a bug report or reaching out to [Matt](mailto:secrmatt@gmail.com) for questions/comments/suggestions.
 License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -16,7 +16,7 @@ Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 LazyData: true
 Config/testthat/edition: 3
 Imports: 
