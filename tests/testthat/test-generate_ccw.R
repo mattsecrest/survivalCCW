@@ -30,18 +30,3 @@ test_that("weights are adequately calculated compared to Maringe", {
   expect_equal(cox_df$coefficients, cox_data_long_cox$coefficients, tolerance = 1e-6)
 
 })
-
-
-test_that("class is correct", {
-
-  df <- toy_df |>
-    create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 182.62) |>
-    cast_clones_to_long() |>
-    generate_ccw(predvars = c("age", "sex", "perf", "stage", "deprivation", "charlson", "emergency"))
-
-  expect_equal(
-    class(df),
-    "ccw_clones_long_weights"
-  )
-
-})

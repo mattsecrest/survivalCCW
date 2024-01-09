@@ -74,7 +74,6 @@ clones <- create_clones(
 )
 
 head(clones)
-
 ```
 
 
@@ -139,7 +138,7 @@ coxph(Surv(t_start, t_stop, outcome) ~ clone, data = df, weights = weight_cox)
 ```
 
 Note that we used `outcome` and not `death` in the `coxph()` model. Still, there is of course a problem with this analysis, as the cloning process renders the variance invalid. The simplest approach to addressing this is 
-to bootstrap the variance.
+to bootstrap the variance. I have not made a function to do this yet, but leave the below as an example of how to do this.
 
 ```{r}
 library(boot)
@@ -221,10 +220,3 @@ boot.ci(boot_out, type = "norm", index = 2)
 ```{r}
 boot.ci(boot_out, type = "norm", index = 3)
 ```
-
-# Putting it all together
-
-We created the function `ccw_analysis` to make this process easier. It is essentially a wrapper around the above 
-function.
-
-
