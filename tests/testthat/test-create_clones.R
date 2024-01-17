@@ -63,54 +63,32 @@ test_that("All clone statuses are correct", {
   expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 0L, "censor"] == 1L))
   expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 0L, "fup_censor"], df[df$exposure == 1L, "exposure_time"])
 
-  
-  ### Truly not exposed, follow-up ends before CED --> keep outcomes
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, "outcome"] <- df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, event]
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, "fup_outcome"] <- df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, time_to_event]
+  ## Truly unexposed
+  ### Censor before CED 
+  #### Exposed clone
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "outcome"], df[df$exposure == 0L & df$fup_time < ced, "event"])
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "fup_outcome"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "censor"] == 0L))
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "fup_censor"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
 
-  ### Truly not exposed, follow-up ends after CED --> censor
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "outcome"] <- 0L
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "fup_outcome"] <- ced_window
+  #### Unexposed clone
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "outcome"], df[df$exposure == 0L & df$fup_time < ced, "event"])
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "fup_outcome"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "censor"] == 0L))
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "fup_censor"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
 
-  ## UNEXPOSED
-  ### Truly unexposed --> keep outcomes
-  df_0[df_0[, exposure] == 0L, "outcome"] <- df_0[df_0[, exposure] == 0L, event]
-  df_0[df_0[, exposure] == 0L, "fup_outcome"] <- df_0[df_0[, exposure] == 0L, time_to_event]
+  ### Censor after CED
+  #### Exposed clone
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "outcome"] == 0))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "fup_outcome"] == ced))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "censor"] == 1L))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "fup_censor"] == ced))
 
-  ### Truly not exposed --> censor at exposure
-  df_0[df_0[, exposure] == 1L, "outcome"] <- 0L
-  df_0[df_0[, exposure] == 1L, "fup_outcome"] <- df_0[df_0[, exposure] == 1L, time_to_exposure]
-
-  # CENSORING
-  ## EXPOSED
-  ### Truly exposed --> Do not censor. Risk of censoring ends at exposure date
-  df_1[df_1[, exposure] == 1L, "censor"] <- 0L
-  df_1[df_1[, exposure] == 1L, "fup_censor"] <- df_1[df_1[, exposure] == 1L, time_to_exposure]
-
-  ### Truly not exposed, true censorship before/on CED --> Do not censor. Risk of censoring ends at event date
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, "censor"] <- 0L
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, "fup_censor"] <- df_1[df_1[, exposure] == 0L & df_1[, time_to_event] <= ced_window, time_to_event]
-
-  ### Truly not exposed, true censorship on/after CED --> Censor at CED.
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "censor"] <- 1L
-  df_1[df_1[, exposure] == 0L & df_1[, time_to_event] > ced_window, "fup_censor"] <- ced_window
-
-  ## UNEXPOSED
-  ### Truly exposed --> Censored at time of exposure.
-  df_0[df_0[, exposure] == 1L, "censor"] <- 1L
-  df_0[df_0[, exposure] == 1L, "fup_censor"] <- df_0[df_0[, exposure] == 1L, time_to_exposure]
-
-  ### Truly not exposed, true censorship before/on CED --> Do not censor. Risk of censoring ends at event date
-  df_0[df_0[, exposure] == 0L & df_0[, time_to_event] <= ced_window, "censor"] <- 0L
-  df_0[df_0[, exposure] == 0L & df_0[, time_to_event] <= ced_window, "fup_censor"] <- df_0[df_0[, exposure] == 0L & df_0[, time_to_event] <= ced_window, time_to_event]
-
-  ### Truly not exposed, true censorship on/after CED --> Do not censor. Risk of censoring ends at CED.
-  df_0[df_0[, exposure] == 0L & df_0[, time_to_event] > ced_window, "censor"] <- 0L
-  df_0[df_0[, exposure] == 0L & df_0[, time_to_event] > ced_window, "fup_censor"] <- ced_window
-
-
-
-
+  #### Unexposed clone
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "outcome"], df[df$exposure == 0L & df$fup_time >= ced, "event"])
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "fup_outcome"], df[df$exposure == 0L & df$fup_time >= ced, "fup_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "censor"] == 0L))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "fup_censor"] == ced))
 
 })
 
