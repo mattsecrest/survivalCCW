@@ -92,10 +92,16 @@ test_that("long format was created correctly", {
   ## Truly unexposed
   ### Censor before CED 
   #### Exposed clone
-  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "outcome"], df[df$exposure == 0L & df$fup_time < ced, "event"])
-  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "fup_outcome"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
-  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "censor"] == 0L))
-  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "fup_censor"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
+  df_long_ <- df_long[df_long$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & df_long$clone == 1, ]
+  df_long_$id_time <- paste0(df_long_$id, "_", df_long_$time_id)
+  df_max_time_id <- aggregate(time_id ~ id, data = df_long_, max)
+  df_long_last <- merge(df_long_, df_max_time_id, by = c("id", "time_id"))
+  df_long_other <- df_long_[!df_long_$id_time %in% df_long_last$id_time,]
+
+  expect_equal(df_long_last$outcome, df[df$exposure == 0L & df$fup_time < ced, "event"])
+  expect_true(all(df_long_other$outcome == 0))
+  expect_equal(df_long_last$t_stop, df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
+  expect_true(all(df_long_$censor == 0))
 
   #### Unexposed clone
   expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "outcome"], df[df$exposure == 0L & df$fup_time < ced, "event"])
