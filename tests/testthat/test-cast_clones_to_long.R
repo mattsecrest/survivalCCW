@@ -117,24 +117,32 @@ test_that("long format was created correctly", {
 
   ### Censor after CED
   #### Exposed clone
-  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "outcome"] == 0))
-  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "fup_outcome"] == ced))
-  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "censor"] == 1L))
-  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "fup_censor"] == ced))
+  df_long_ <- df_long[df_long$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & df_long$clone == 1, ]
+  df_long_$id_time <- paste0(df_long_$id, "_", df_long_$time_id)
+  df_max_time_id <- aggregate(time_id ~ id, data = df_long_, max)
+  df_long_last <- merge(df_long_, df_max_time_id, by = c("id", "time_id"))
+  df_long_other <- df_long_[!df_long_$id_time %in% df_long_last$id_time,]
+
+  expect_true(all(df_long_$outcome == 0))
+  expect_true(all(df_long_last$censor == 1))
+  expect_true(all(df_long_other$censor == 0))
+  expect_true(all(df_long_last$t_stop == ced))
 
   #### Unexposed clone
-  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "outcome"], df[df$exposure == 0L & df$fup_time >= ced, "event"])
-  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "fup_outcome"], df[df$exposure == 0L & df$fup_time >= ced, "fup_time"])
-  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "censor"] == 0L))
-  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "fup_censor"] == ced))
+  df_long_ <- df_long[df_long$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & df_long$clone == 0, ]
+  df_long_$id_time <- paste0(df_long_$id, "_", df_long_$time_id)
+  df_max_time_id <- aggregate(time_id ~ id, data = df_long_, max)
+  df_long_last <- merge(df_long_, df_max_time_id, by = c("id", "time_id"))
+  df_long_other <- df_long_[!df_long_$id_time %in% df_long_last$id_time,]
 
-
-  
+  expect_equal(df_long_last$outcome, df[df$exposure == 0L & df$fup_time >= ced, "event"])
+  expect_true(all(df_long_other$outcome == 0))
+  expect_true(all(df_long_$censor == 0))
+  expect_equal(df_long_last$t_stop, df[df$exposure == 0L & df$fup_time >= ced, "fup_time"])  
   
 })
 
-
-test_that("Compare results to Maringe", {
+test_that("Maringe long data is recreated", {
 
   df <- toy_df |>
     create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 182.62) |>
