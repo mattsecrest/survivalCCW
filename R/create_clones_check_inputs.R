@@ -76,7 +76,7 @@ create_clones_check_inputs <- function(
                         "p_uncens", "hazard", "lp")
    for (name in protected_names) {
       if (name %in% names(df)) {
-         stop("'", name, "' is a protected collumn name and will be used by the function. Please rename this column")
+         stop("'", name, "' is a protected column name and will be used by the function. Please rename this column")
       }
    }
 

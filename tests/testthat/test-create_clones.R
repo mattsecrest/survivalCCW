@@ -8,6 +8,8 @@ test_that("CED trims time to exposure appropriately", {
     time_to_exposure = c(NA_real_, 2.3, NA_real_, 3.3)
   )
 
+  expect_equal(1L, df[df$id==4, "exposure"])
+
   expect_message(
     ccw_df <- create_clones(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = 2.5),
     "Updating 1 patients' exposure and time-to-exposure based on CED window"
@@ -17,178 +19,84 @@ test_that("CED trims time to exposure appropriately", {
 
 })
 
+test_that("All clone statuses are correct", {
 
-test_that("Spot check that outcomes are correctly assigned", {
+  # Check statuses for all combinations:
+  # Exposed before CED vs unexposed before CED 
+  # Censored before CED vs censored after CED
+  # Death before CED vs death after CED
 
-  df <- data.frame(
-    id = 1:6,
-    event = c(1L, 1L, 1L, 1L, 1L, 1L),
-    time_to_event = c(10, 100, 100, 10, 100, 100),
-    exposure = c(rep(0L, 3), rep(1L, 3)),
-    time_to_exposure = c(rep(NA_real_, 3), 2, 8, 12)
+  ced <- 100
+  exposure_time <- c(80, NA_real_)
+  fup_time <- c(85, 125)
+  event <- c(0L, 1L)
+
+  df <- expand.grid(
+    exposure_time = exposure_time,
+    fup_time = fup_time,
+    event = event
   )
 
-  ccw_df <- create_clones(df,
-                          id = "id", 
-                          event = "event", 
-                          time_to_event = "time_to_event", 
-                          exposure = "exposure", 
-                          time_to_exposure = "time_to_exposure", 
-                          ced_window = 20)
+  df$exposure <- !is.na(df$exposure_time)
+  df$id <- 1:NROW(df)
 
-  # Exposed clones
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 1, "outcome"],
-    1L
+  ccw_df <- create_clones(
+    df, 
+    id = "id", 
+    event = "event", 
+    time_to_event = "fup_time", 
+    exposure = "exposure", 
+    time_to_exposure = "exposure_time", 
+    ced_window = ced
   )
 
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 1, "fup_outcome"],
-    10
-  )
+  ## Truly exposed
+  ### Exposed clone
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 1L, "outcome"], df[df$exposure == 1L, "event"])
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 1L, "fup_outcome"], df[df$exposure == 1L, "fup_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 1L, "censor"] == 0L))
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 1L, "fup_censor"], df[df$exposure == 1L, "exposure_time"])
+  
+  ### Unexposed clone
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 0L, "outcome"] == 0))
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 0L, "fup_outcome"], df[df$exposure == 1L, "exposure_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 0L, "censor"] == 1L))
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 1L, "id"] & ccw_df$clone == 0L, "fup_censor"], df[df$exposure == 1L, "exposure_time"])
 
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 1, "outcome"],
-    1L
-  )
+  ## Truly unexposed
+  ### Censor before CED 
+  #### Exposed clone
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "outcome"], df[df$exposure == 0L & df$fup_time < ced, "event"])
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "fup_outcome"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "censor"] == 0L))
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 1L, "fup_censor"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
 
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 1, "fup_outcome"],
-    10
-  )
+  #### Unexposed clone
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "outcome"], df[df$exposure == 0L & df$fup_time < ced, "event"])
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "fup_outcome"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "censor"] == 0L))
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time < ced, "id"] & ccw_df$clone == 0L, "fup_censor"], df[df$exposure == 0L & df$fup_time < ced, "fup_time"])
 
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 1, "outcome"],
-    0L
-  )
+  ### Censor after CED
+  #### Exposed clone
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "outcome"] == 0))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "fup_outcome"] == ced))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "censor"] == 1L))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 1L, "fup_censor"] == ced))
 
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 1, "fup_outcome"],
-    20
-  )
-
-  # Unexposed clones
-  # Exposed clones
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 0, "outcome"],
-    0L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 0, "fup_outcome"],
-    2
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 0, "outcome"],
-    1L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 0, "fup_outcome"],
-    10
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 0, "outcome"],
-    1L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 0, "fup_outcome"],
-    100
-  )
+  #### Unexposed clone
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "outcome"], df[df$exposure == 0L & df$fup_time >= ced, "event"])
+  expect_equal(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "fup_outcome"], df[df$exposure == 0L & df$fup_time >= ced, "fup_time"])
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "censor"] == 0L))
+  expect_true(all(ccw_df[ccw_df$id %in% df[df$exposure == 0L & df$fup_time >= ced, "id"] & ccw_df$clone == 0L, "fup_censor"] == ced))
 
 })
 
-
-test_that("Spot check that censoring statuses are correctly assigned",{
-
-  df <- data.frame(
-    id = 1:6,
-    event = c(1L, 1L, 1L, 1L, 1L, 1L),
-    time_to_event = c(10, 100, 100, 10, 100, 100),
-    exposure = c(rep(0L, 3), rep(1L, 3)),
-    time_to_exposure = c(rep(NA_real_, 3), 2, 8, 12)
-  )
-
-  ccw_df <- create_clones(df,
-                          id = "id", 
-                          event = "event", 
-                          time_to_event = "time_to_event", 
-                          exposure = "exposure", 
-                          time_to_exposure = "time_to_exposure", 
-                          ced_window = 20)
-
-  # Exposed clones
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 1, "censor"],
-    0L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 1, "fup_censor"],
-    2
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 1, "censor"],
-    0L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 1, "fup_censor"],
-    10
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 1, "censor"],
-    1L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 1, "fup_censor"],
-    20
-  )
-
-  # Unexposed clones
-  # Exposed clones
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 0, "censor"],
-    1L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==4 & ccw_df$clone == 0, "fup_censor"],
-    2
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 0, "censor"],
-    0L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==1 & ccw_df$clone == 0, "fup_censor"],
-    10
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 0, "censor"],
-    0L
-  )
-
-  expect_equal(
-    ccw_df[ccw_df$id==2 & ccw_df$clone == 0, "fup_censor"],
-    20
-  )
-
-})
-
-test_that("Compare results to Maringe", {
+test_that("Maringe results are replicated", {
 
   df <- toy_df |>
     create_clones(id = "id", event = "death", time_to_event = "fup_obs", exposure = "surgery", time_to_exposure = "timetosurgery", ced_window = 182.62)
+
   df <- df[order(df$id, df$clone),]
 
   tab <- tab[order(tab$id, tab$clone),]
@@ -206,7 +114,7 @@ test_that("Compare results to Maringe", {
 
 })
 
-test_that("attribute are passed correctly", {
+test_that("Study attributes are passed correctly", {
 
   df <- data.frame(
     id = 1:6,
