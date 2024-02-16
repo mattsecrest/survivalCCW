@@ -703,7 +703,7 @@ example of how to do this.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intervals : </span></span>
 <span><span class="co">#&gt; Level      Normal        </span></span>
-<span><span class="co">#&gt; 95%   ( 0.3372,  0.8608 )  </span></span>
+<span><span class="co">#&gt; 95%   ( 0.4709,  0.8427 )  </span></span>
 <span><span class="co">#&gt; Calculations and Intervals on Original Scale</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -719,7 +719,7 @@ example of how to do this.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intervals : </span></span>
 <span><span class="co">#&gt; Level      Normal        </span></span>
-<span><span class="co">#&gt; 95%   (-8.110, 19.778 )  </span></span>
+<span><span class="co">#&gt; 95%   (-4.665, 12.821 )  </span></span>
 <span><span class="co">#&gt; Calculations and Intervals on Original Scale</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -735,9 +735,77 @@ example of how to do this.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intervals : </span></span>
 <span><span class="co">#&gt; Level      Normal        </span></span>
-<span><span class="co">#&gt; 95%   ( 0.0330,  0.2156 )  </span></span>
+<span><span class="co">#&gt; 95%   ( 0.0023,  0.2040 )  </span></span>
 <span><span class="co">#&gt; Calculations and Intervals on Original Scale</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="competing-risks">Competing risks<a class="anchor" aria-label="anchor" href="#competing-risks"></a>
+</h2>
+<p>The extension of the package functionality to issues of competing
+risks is trivial. We keep our outcome variable as an integer but add
+additional values.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">toy_df</span><span class="op">$</span><span class="va">competing</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">toy_df</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">toy_df</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      id surgery timetosurgery death sex charlson perf stage emergency fup_obs</span></span>
+<span><span class="co">#&gt; 1 P5958       0            NA     0   2        1    2     2         1  365.24</span></span>
+<span><span class="co">#&gt; 2 P3075       0            NA     0   2        1    0     2         0  365.24</span></span>
+<span><span class="co">#&gt; 3 P1410       0            NA     0   1        1    2     1         0  365.24</span></span>
+<span><span class="co">#&gt; 4 P4957       0            NA     0   2        0    1     1         0  365.24</span></span>
+<span><span class="co">#&gt; 5 P7340       0            NA     1   1        0    2     2         1  123.00</span></span>
+<span><span class="co">#&gt; 6 P1917       0            NA     0   2        0    0     1         0  365.24</span></span>
+<span><span class="co">#&gt;        age deprivation competing</span></span>
+<span><span class="co">#&gt; 1 79.57290        0.42         0</span></span>
+<span><span class="co">#&gt; 2 82.91855        0.07         1</span></span>
+<span><span class="co">#&gt; 3 84.03011        0.22         2</span></span>
+<span><span class="co">#&gt; 4 78.34634        0.12         2</span></span>
+<span><span class="co">#&gt; 5 83.63860        0.40         2</span></span>
+<span><span class="co">#&gt; 6 82.26147        0.03         0</span></span></code></pre></div>
+<p>We can then conduct the same analysis as before, but with the
+<code>competing</code> variable as the outcome. The bootstrapped
+analysis is not shown, but you can see that hte same approach can be
+used.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">compete_ccw</span> <span class="op">&lt;-</span> <span class="va">toy_df</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/create_clones.html">create_clones</a></span><span class="op">(</span></span>
+<span>    id <span class="op">=</span> <span class="st">'id'</span>,</span>
+<span>    event <span class="op">=</span> <span class="st">'competing'</span>,</span>
+<span>    time_to_event <span class="op">=</span> <span class="st">'fup_obs'</span>,</span>
+<span>    exposure <span class="op">=</span> <span class="st">'surgery'</span>,</span>
+<span>    time_to_exposure <span class="op">=</span> <span class="st">'timetosurgery'</span>,</span>
+<span>    ced_window <span class="op">=</span> <span class="fl">365.25</span><span class="op">/</span><span class="fl">2</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/cast_clones_to_long.html">cast_clones_to_long</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/generate_ccw.html">generate_ccw</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'age'</span>, <span class="st">'sex'</span>, <span class="st">'perf'</span>, <span class="st">'stage'</span>, <span class="st">'deprivation'</span>, <span class="st">'charlson'</span>, <span class="st">'emergency'</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">compete_ccw</span><span class="op">$</span><span class="va">outcome</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     0     1     2 </span></span>
+<span><span class="co">#&gt; 22629    64    79</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">compete_ccw</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   time_id t_start    id surgery timetosurgery death sex charlson perf stage</span></span>
+<span><span class="co">#&gt; 1       0       0 P1074       0            NA     1   2        1    2     1</span></span>
+<span><span class="co">#&gt; 2       1       1 P1074       0            NA     1   2        1    2     1</span></span>
+<span><span class="co">#&gt; 3       2       7 P1074       0            NA     1   2        1    2     1</span></span>
+<span><span class="co">#&gt; 4       3       8 P1074       0            NA     1   2        1    2     1</span></span>
+<span><span class="co">#&gt; 5       4      10 P1074       0            NA     1   2        1    2     1</span></span>
+<span><span class="co">#&gt; 6       5      16 P1074       0            NA     1   2        1    2     1</span></span>
+<span><span class="co">#&gt;   emergency fup_obs      age deprivation competing censor fup_censor clone</span></span>
+<span><span class="co">#&gt; 1         0     345 76.67899        0.33         0      0    182.625     0</span></span>
+<span><span class="co">#&gt; 2         0     345 76.67899        0.33         0      0    182.625     0</span></span>
+<span><span class="co">#&gt; 3         0     345 76.67899        0.33         0      0    182.625     0</span></span>
+<span><span class="co">#&gt; 4         0     345 76.67899        0.33         0      0    182.625     0</span></span>
+<span><span class="co">#&gt; 5         0     345 76.67899        0.33         0      0    182.625     0</span></span>
+<span><span class="co">#&gt; 6         0     345 76.67899        0.33         0      0    182.625     0</span></span>
+<span><span class="co">#&gt;   fup_outcome outcome t_stop t_event        lp  t   hazard  p_uncens weight_cox</span></span>
+<span><span class="co">#&gt; 1           1       0      1      NA -7.420857 NA   0.0000 1.0000000   1.000000</span></span>
+<span><span class="co">#&gt; 2           7       0      7       1 -7.420857  1 162.5508 0.9072759   1.102201</span></span>
+<span><span class="co">#&gt; 3           8       0      8       7 -7.420857  7 162.5508 0.9072759   1.102201</span></span>
+<span><span class="co">#&gt; 4          10       0     10       8 -7.420857  8 171.7593 0.9022882   1.108293</span></span>
+<span><span class="co">#&gt; 5          16       0     16      10 -7.420857 10 176.4477 0.8997594   1.111408</span></span>
+<span><span class="co">#&gt; 6          18       0     18      16 -7.420857 16 181.2410 0.8971813   1.114602</span></span></code></pre></div>
 </div>
   </div>
 
