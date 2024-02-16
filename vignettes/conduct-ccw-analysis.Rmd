@@ -220,3 +220,34 @@ boot.ci(boot_out, type = "norm", index = 2)
 ```{r}
 boot.ci(boot_out, type = "norm", index = 3)
 ```
+
+
+# Competing risks
+The extension of the package functionality to issues of competing risks is trivial. We keep our outcome variable 
+as an integer but add additional values.
+
+```{r}
+toy_df$competing <- sample(0:2, nrow(toy_df), replace = TRUE)
+head(toy_df)
+```
+
+We can then conduct the same analysis as before, but with the `competing` variable as the outcome. The 
+bootstrapped analysis is not shown, but you can see that hte same approach can be used.
+
+```{r}
+compete_ccw <- toy_df |>
+  create_clones(
+    id = 'id',
+    event = 'competing',
+    time_to_event = 'fup_obs',
+    exposure = 'surgery',
+    time_to_exposure = 'timetosurgery',
+    ced_window = 365.25/2
+  ) |>
+  cast_clones_to_long() |>
+  generate_ccw(c('age', 'sex', 'perf', 'stage', 'deprivation', 'charlson', 'emergency'))
+
+table(compete_ccw$outcome)
+
+head(compete_ccw)
+```

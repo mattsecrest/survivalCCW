@@ -54,13 +54,22 @@ cast_clones_to_long <- function(df) {
    
    df_1$t_start <- 0.
 
-   df_1_long_outcome <- survival::survSplit(
-      df_1, 
-      cut = event_times, 
-      end = "fup_outcome",
-      start = "t_start",
-      event = "outcome"
-   )
+   ## To accomodate multiple outcomes (eg competing risks), do this iteratively
+   df_1_long_outcome_list <- vector("list", length = NROW(unique(df_1$outcome)))
+
+   for (i in 1:NROW(unique(df_1$outcome))) {
+      df_outcome <- df_1[df_1$outcome == unique(df_1$outcome)[i], ]
+      df_outcome$outcome <- 1L
+      df_1_long_outcome_list[[i]] <- survival::survSplit(
+         data = df_outcome,
+         cut = event_times, 
+         end = "fup_outcome",
+         start = "t_start",
+         event = "outcome"
+      )
+      df_1_long_outcome_list[[i]]$outcome <- ifelse(df_1_long_outcome_list[[i]]$outcome == 1L, unique(df_1$outcome)[i], 0L)
+   }
+   df_1_long_outcome <- do.call(rbind, df_1_long_outcome_list)
 
    df_1_long_outcome <- df_1_long_outcome[order(df_1_long_outcome[, id], df_1_long_outcome[, "fup_outcome"]), ]
 
@@ -97,13 +106,22 @@ cast_clones_to_long <- function(df) {
    
    df_0$t_start <- 0.
 
-   df_0_long_outcome <- survival::survSplit(
-      df_0, 
-      cut = event_times, 
-      end = "fup_outcome",
-      start = "t_start",
-      event = "outcome"
-   )
+   ## To accomodate multiple outcomes (eg competing risks), do this iteratively
+   df_0_long_outcome_list <- vector("list", length = NROW(unique(df_0$outcome)))
+
+   for (i in 1:NROW(unique(df_0$outcome))) {
+      df_outcome <- df_0[df_0$outcome == unique(df_0$outcome)[i], ]
+      df_outcome$outcome <- 1L
+      df_0_long_outcome_list[[i]] <- survival::survSplit(
+         data = df_outcome,
+         cut = event_times, 
+         end = "fup_outcome",
+         start = "t_start",
+         event = "outcome"
+      )
+      df_0_long_outcome_list[[i]]$outcome <- ifelse(df_0_long_outcome_list[[i]]$outcome == 1L, unique(df_0$outcome)[i], 0L)
+   }
+   df_0_long_outcome <- do.call(rbind, df_0_long_outcome_list)
 
    df_0_long_outcome <- df_0_long_outcome[order(df_0_long_outcome[, id], df_0_long_outcome[, "fup_outcome"]), ]
 
