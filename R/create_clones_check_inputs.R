@@ -49,13 +49,9 @@ create_clones_check_inputs <- function(
       stop("Time to exposure should be complete for patients who have exposure = 1")
    }
 
-   # Check exposure and event are just 0/1 or T/F
+   # Check exposure is just 0/1 or T/F
    if (any(df[, exposure] != 0L & df[, exposure] != 1L)) {
       stop("Exposure should be 0/1 or T/F")
-   }
-
-   if (any(df[, event] != 0L & df[, event] != 1L)) {
-      stop("Event should be 0/1 or T/F")
    }
 
    # Make sure the user did not pass the same column name twice
