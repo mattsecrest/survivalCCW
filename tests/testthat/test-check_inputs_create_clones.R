@@ -69,7 +69,7 @@ test_that("missing data is caught when in study columns (other than time to expo
 
   expect_error(
     create_clones_check_inputs(df, id = "id", event = "event", time_to_event = "time_to_event", exposure = "exposure", time_to_exposure = "time_to_exposure", ced_window = 200),
-    "There are missing data in the study columns"
+    "There are missing data in one of the study columns: id, event, time_to_event, exposure"
   )
 
 })

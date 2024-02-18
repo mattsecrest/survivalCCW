@@ -1,3 +1,6 @@
+# survivalCCW 0.0.4
+* Bug fix in `generate_ccw` function
+
 # survivalCCW 0.0.3
 * Allow now for competing risks
 

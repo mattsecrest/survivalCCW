@@ -7,6 +7,8 @@
 #' @return a data.frame with weight columns included
 generate_ccw_calc_weights <- function(df,  event_times_df, predvars) {
 
+   id <- attributes(df)$id
+
    # Make sure no plus sign in input
    if (any(grepl("\\+", predvars))) {
       stop("No plus signs allowed in column names -- this impacts the formula creation")
@@ -46,7 +48,7 @@ generate_ccw_calc_weights <- function(df,  event_times_df, predvars) {
       all.x = TRUE
    )
 
-   df <- df[order(df[,id], df$fup_outcome),]
+   df <- df[order(df[, id], df$fup_outcome),]
    df$hazard <- ifelse(is.na(df$hazard), 0, df$hazard)
    df$p_uncens <- exp(-(df$hazard) * exp(df$lp))
    df$weight_cox  <- 1 / df$p_uncens
