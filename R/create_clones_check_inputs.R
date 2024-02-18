@@ -37,7 +37,7 @@ create_clones_check_inputs <- function(
    # Check that there are no missing data in the study columns (except time to exposure)
    cc_sum <- sum(stats::complete.cases(df[, c(id, event, time_to_event, exposure)]))
    if (cc_sum != NROW(df)) {
-      stop("There are missing data in the study columns")
+      stop(paste0("There are missing data in one of the study columns: ", id, ", ", event, ", ", time_to_event, ", ", exposure))
    }
 
    # Check time to exposure is missing just for when exposure is 0/F
