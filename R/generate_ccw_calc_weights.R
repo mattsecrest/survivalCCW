@@ -7,6 +7,11 @@
 #' @return a data.frame with weight columns included
 generate_ccw_calc_weights <- function(df,  event_times_df, predvars) {
 
+   # Make sure no plus sign in input
+   if (any(grepl("\\+", predvars))) {
+      stop("No plus signs allowed in column names -- this impacts the formula creation")
+   }
+
    model_fmla <- stats::as.formula(
       paste0(
          "survival::Surv(t_start, t_stop, censor) ~ ",
