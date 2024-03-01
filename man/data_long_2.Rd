@@ -3,7 +3,7 @@
 \docType{data}
 \name{data_long_2}
 \alias{data_long_2}
-\title{Testing data for \code{generate_ccw_calc_weights}, no surgery recipients}
+\title{Testing data for \code{calc_weights}, no surgery recipients}
 \format{
 An object of class \code{data.frame} with 8792 rows and 27 columns.
 }

@@ -55,6 +55,7 @@ cast_clones_to_long <- function(df) {
    df_1$t_start <- 0.
 
    ## To accomodate multiple outcomes (eg competing risks), do this iteratively
+   ## TODO speed up and improve
    df_1_long_outcome_list <- vector("list", length = NROW(unique(df_1$outcome)))
 
    for (i in 1:NROW(unique(df_1$outcome))) {

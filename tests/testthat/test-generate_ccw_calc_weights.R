@@ -15,11 +15,11 @@ test_that("weights are adequately calculated compared to Maringe", {
   # Create weights
   predvars <- c("age", "sex", "perf", "stage", "deprivation", "charlson", "emergency")
 
-  df_1 <- generate_ccw_calc_weights(df[df$clone == 1L, ], event_times_df, predvars)
+  df_1 <- calc_weights(df[df$clone == 1L, ], event_times_df, predvars)
   df_1 <- df_1[order(df_1$id, df_1$time_id),]
   row.names(df_1) <- NULL
 
-  df_0 <- generate_ccw_calc_weights(df[df$clone == 0L, ], event_times_df, predvars)
+  df_0 <- calc_weights(df[df$clone == 0L, ], event_times_df, predvars)
   df_0 <- df_0[order(df_0$id, df_0$time_id),]
   row.names(df_0) <- NULL
 
@@ -65,7 +65,7 @@ test_that("plus signs are caught in column names", {
   )
 
   expect_error(
-    generate_ccw_calc_weights(df, event_times_df, predvars = "hamburger+"),
+    calc_weights(df, event_times_df, predvars = "hamburger+"),
     "No plus signs allowed in column names -- this impacts the formula creation"
   )
 

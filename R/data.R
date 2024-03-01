@@ -49,7 +49,7 @@
 #' @source <https://doi.org/10.1093/ije/dyaa057>
 "data_final"
 
-#' Testing data for `generate_ccw_calc_weights`, surgery recipients
+#' Testing data for `calc_weights`, surgery recipients
 #'
 #' The long clones dataset with weights for surgery recipients from Maringe et al. (2020) named `data_long`
 #' 
@@ -58,7 +58,7 @@
 #' @source <https://doi.org/10.1093/ije/dyaa057>
 "data_long"
 
-#' Testing data for `generate_ccw_calc_weights`, no surgery recipients
+#' Testing data for `calc_weights`, no surgery recipients
 #'
 #' The long clones dataset with weights for no surgery recipients from Maringe et al. (2020) named `data_long_2`
 #' 
