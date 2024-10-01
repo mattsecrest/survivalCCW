@@ -8,4 +8,4 @@ maturing](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https
 
 <!-- badges: end -->
 
-This is a work-in-progress package that conducts clone censor weight analyses in R. Please use at your own risk. Consider filing a bug report or reaching out to [Matt](mailto:secrmatt@gmail.com) for questions/comments/suggestions.
+Package has moved!!! Please go to [https://github.com/Genentech/survivalCCW](https://github.com/Genentech/survivalCCW)
